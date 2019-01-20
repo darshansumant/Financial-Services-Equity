@@ -14,7 +14,4 @@ Leveraging the data collected and published by the Consumer Financial Protection
 An initial analysis of the CFPB website and online reports also indicates a lack of effective and sticky messaging to ensure wider public awareness of such inequities. Through the Data Visualization course, I would like to try and contribute to a shift in more effective communication and public engagement.
 <br>
 <br>
-An initial analysis of the CFPB website and online reports also indicates a lack of effective and sticky messaging to ensure wider public awareness of such inequities. Through the Data Visualization course, I would like to try and contribute to a shift in more effective communication and public engagement.
-<br>
-<br>
 The initial scope of the project is limited to Mortgages, though other types of consumer credit such as credit cards, auto loans, and personal loans may be included based on availability of data.
