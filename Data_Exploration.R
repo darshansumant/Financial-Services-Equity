@@ -12,6 +12,7 @@ install.packages("tidyr")
 install.packages("stringr")
 install.packages("ggplot2")
 install.packages("zoo")
+install.packages("lubridate")
 
 # Load required packages
 library("readr")
@@ -22,6 +23,7 @@ library("tidyr")
 library("stringr")
 library("ggplot2")
 library("zoo")
+library("lubridate")
 
 # Load all data
 del_county = read_csv("datasets/CountyMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
@@ -58,7 +60,8 @@ del_metro_long <- gather(select(del_metro, -c(Name, CBSACode)),
                          value = delinquency_rate,
                          convert = TRUE,
                          -RegionType) %>% 
-  mutate(Month = as.Date(paste(Month,"-01",sep="")))
+  mutate(Month = as.Date(paste(Month,"-01",sep="")),
+         Mth = format(Month, "%b"))
   #mutate(Month = as.yearmon(Month))
 
 
@@ -73,6 +76,8 @@ del_by_metro <- del_metro_long %>%
             max_del = max(delinquency_rate),
             min_del = min(delinquency_rate),
             del_diff = max_del - min_del)
+
+del_by_metro
 
 # Plot delinquency trends by Region Type
 p1 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)), 
@@ -91,6 +96,29 @@ p1 + labs(colour = "Region Type",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "A") + 
   scale_x_date(date_labels = "%Y")
+
+format(del_by_metro$Month, "%b")
+
+# Regress mean delinquency rate by Month & Region Type
+del_by_metro$pred.mean_del <- predict(lm(mean_del ~ format(Month, "%m") + RegionType, 
+                                        data = del_by_metro))
+
+del_by_metro
+
+p2 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)),
+             aes(x=format(Month, "%m"),
+                 y=del_diff,
+                 fill=RegionType)) + 
+  geom_boxplot()
+
+p2 + labs(colour = "Region Type", 
+          x = "Month",
+          y = "Disparity in delinquency (max - min) across States", 
+          title = "Delinquency disparity across states is largely due to Metro Areas",
+          subtitle = "there is a subtle seasonal pattern even in disparity",
+          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          tag = "B")
+
 
 # Plot delinquency rates by month
 ggplot(del_county_long, 
