@@ -89,8 +89,9 @@ p1 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)),
   geom_point() + 
   geom_line()
 
-p1 + labs(colour = "Region Type", 
-          y = "Mean Delinquency Rate", 
+p1 + labs(colour = "Region Type",
+          x = "Year",
+          y = "Mean Delinquency Rate (% overdue by 30-89 days)", 
           title = "Delinquency rates have declined after an initial spike following the 2008 crisis",
           subtitle = "seasonality patterns in delinquency are clearly visible",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
@@ -107,17 +108,19 @@ del_by_metro
 
 p2 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)),
              aes(x=format(Month, "%m"),
-                 y=del_diff,
+                 y=del_diff/100,
                  fill=RegionType)) + 
   geom_boxplot()
 
 p2 + labs(colour = "Region Type", 
           x = "Month",
-          y = "Disparity in delinquency (max - min) across States", 
+          y = "Disparity in delinquency rate (max - min) across States", 
           title = "Delinquency disparity across states is largely due to Metro Areas",
-          subtitle = "there is a subtle seasonal pattern even in disparity",
+          subtitle = "there is a subtle seasonal pattern even in delinquency disparity",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
-          tag = "B")
+          tag = "B") + 
+  scale_y_continuous(labels = scales::percent) + 
+  scale_x_discrete("Month")
 
 
 # Plot delinquency rates by month
