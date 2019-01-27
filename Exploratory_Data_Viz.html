@@ -252,42 +252,11 @@ npa_county = read_csv(&quot;datasets/CountyMortgagesPercent-90-plusDaysLate-thru
 ##   CBSACode = col_character()
 ## )
 ## See spec(...) for full column specifications.</code></pre>
-<pre class="r"><code># Delinquency Rates by County
-del_county_long &lt;- gather(select(del_county, -c(RegionType, State, FIPSCode)),
-                          key = Month,
-                          value = delinquency_rate,
-                          convert = TRUE,
-                          -Name) %&gt;% 
-  mutate(Month = as.Date(paste(Month,&quot;-01&quot;,sep=&quot;&quot;)),
-         Mth = format(Month, &quot;%b&quot;))
-
-# Delinquency Rates by State
-del_state_long &lt;- gather(select(del_state, -c(RegionType, FIPSCode)),
-                         key = Month,
-                         value = delinquency_rate,
-                         convert = TRUE,
-                         -Name) %&gt;% 
-  mutate(Month = as.Date(paste(Month,&quot;-01&quot;,sep=&quot;&quot;)),
-         Mth = format(Month, &quot;%b&quot;))
-
-# Delinquency Rates by State &amp; Area Type
-del_metro_long &lt;- gather(select(del_metro, -c(Name, CBSACode)),
-                         key = Month,
-                         value = delinquency_rate,
-                         convert = TRUE,
-                         -RegionType) %&gt;% 
-  mutate(Month = as.Date(paste(Month,&quot;-01&quot;,sep=&quot;&quot;)),
-         Mth = format(Month, &quot;%b&quot;))
-
-
-# NPA Rates by State &amp; Area Type
-npa_metro_long &lt;- gather(select(npa_metro, -c(Name, CBSACode)),
-                         key = Month,
-                         value = default_rate,
-                         convert = TRUE,
-                         -RegionType) %&gt;% 
-  mutate(Month = as.Date(paste(Month,&quot;-01&quot;,sep=&quot;&quot;)),
-         Mth = format(Month, &quot;%b&quot;))</code></pre>
+<pre class="r"><code>knitr::opts_chunk$set(echo = FALSE, warning = FALSE)</code></pre>
+<pre><code>##  [1] &quot;del_county&quot;      &quot;del_county_long&quot; &quot;del_metro&quot;      
+##  [4] &quot;del_metro_long&quot;  &quot;del_state&quot;       &quot;del_state_long&quot; 
+##  [7] &quot;npa_county&quot;      &quot;npa_county_long&quot; &quot;npa_metro&quot;      
+## [10] &quot;npa_metro_long&quot;  &quot;npa_state&quot;       &quot;npa_state_long&quot;</code></pre>
 
 
 
