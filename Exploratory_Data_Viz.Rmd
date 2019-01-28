@@ -87,7 +87,6 @@ npa_metro = read_csv("datasets/MetroAreaMortgagesPercent-90-plusDaysLate-thru-20
 # Load National Financial Well-Being Survey data
 nfwbs_puf = read_csv("datasets/NFWBS_PUF_2016_data.csv")
 
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
 ```{r Convert data to long format}
@@ -152,7 +151,6 @@ npa_metro_long <- gather(select(npa_metro, -c(Name, CBSACode)),
 # Check datasets loaded
 ls()
 
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
 ```{r Group By AreaType & Month}
@@ -174,7 +172,6 @@ npa_by_metro <- npa_metro_long %>%
             min_npa = min(default_rate),
             npa_diff = max_npa - min_npa)
 
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
 ```{r Merge Delinquency & NPA rates}
@@ -258,7 +255,7 @@ p3 <- ggplot(filter(tot_by_metro, grepl("Metro", RegionType)),
 p3 + scale_y_continuous(expand = c(0,0),
                         labels = scales::comma,
                         sec.axis = sec_axis(~.*3, name = "Mean Default (NPA) rate [% overdue by 90+ days]")) + 
-  scale_fill_gradientn(colours = terrain.colors(10)) + 
+  scale_color_gradientn(colours = terrain.colors(10)) + 
   labs(colour = "Intensity of distress", 
        x = "Year",
        y = "Mean Delinquency rate [% overdue by 30-89 days]", 
@@ -273,16 +270,71 @@ p3 + scale_y_continuous(expand = c(0,0),
 
 ```
 
-```{r Maps}
+```{r Plot D}
+
+# Convert state names to lowercase 
+del_state_long$Name <- tolower(del_state_long$Name)
+
+# Month-on-month Delinquency Rates by Metro Area
+del_by_state <- del_state_long %>% 
+  group_by(Name, Month) %>%
+  summarise(mean_del = mean(delinquency_rate),
+            max_del = max(delinquency_rate),
+            min_del = min(delinquency_rate),
+            del_diff = max_del - min_del)
+
 
 states <- map_data("state")
 
-del_state_long$Name <- tolower(del_state_long$Name)
-
-del_state_map <- merge(states, del_state_long, sort = FALSE, 
+# Merge with Map Data
+del_state_map <- merge(states, del_by_state, sort = FALSE, 
                        by.x = "region", 
                        by.y = "Name")
 
-ggplot(del_state_map, aes(long, lat)) + 
-  geom_polygon(aes(fill = delinquency_rate))
+p4<- ggplot(del_state_map, aes(long, lat)) + 
+  geom_polygon(aes(fill = mean_del, group=group), color="white") + 
+  coord_fixed(1.3)
+
+p4 + labs(colour = "Mean Delinquency Rate", 
+          x = "Longitude",
+          y = "Latitude", 
+          title = "Substantial differences in delinquency rates across states",
+          subtitle = "states vary widely from each other, though no regional trends seen",
+          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          tag = "D") + 
+  scale_fill_gradientn(colours = terrain.colors(10))
+
+```
+
+```{r Plot E}
+
+# Convert state names to lowercase 
+npa_state_long$Name <- tolower(npa_state_long$Name)
+
+# Month-on-month Delinquency Rates by Metro Area
+npa_by_state <- npa_state_long %>% 
+  group_by(Name, Month) %>%
+  summarise(mean_npa = mean(default_rate),
+            max_npa = max(default_rate),
+            min_npa = min(default_rate),
+            npa_diff = max_npa - min_npa)
+
+# Merge with Map Data
+npa_state_map <- merge(states, npa_by_state, sort = FALSE, 
+                       by.x = "region", 
+                       by.y = "Name")
+
+p5<- ggplot(npa_state_map, aes(long, lat)) + 
+  geom_polygon(aes(fill = mean_npa, group=group), color="white") + 
+  coord_fixed(1.3)
+
+p5 + labs(colour = "Mean NPA Rate", 
+          x = "Longitude",
+          y = "Latitude", 
+          title = "Unlike delinquency, NPA rates do not vary as much across states",
+          subtitle = "states with higher delinquency rates may be focusing more on debt collections",
+          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          tag = "E") + 
+  scale_fill_gradientn(colours = terrain.colors(10))
+
 ```
