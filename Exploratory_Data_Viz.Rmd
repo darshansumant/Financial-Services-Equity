@@ -1,13 +1,58 @@
 ---
-title: "Exploratory_Data_Viz"
+title: "Preliminary overview of the US Financial Services market"
 author: "Darshan Sumant"
 date: "January 27, 2019"
-output: html_document
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
 ---
+
+## Project Inspiration
+
+The innumerous stories of federal government employees living paycheck to paycheck and who are now forced to take drastic measures during the ongoing government shutdown inspired me to review why and how the banking and financial services system has failed the working class citizens in the largest economy in the world.
+
+In this document, we explore existing data made available by the Consumer Financial Protection Bureau (CFPB) <https://www.consumerfinance.gov/>
+
+>Data Sources include:
+>
+1. Home Mortgage Disclosure Act (HMDA) dataset <https://www.consumerfinance.gov/data-research/hmda/>
+2. Mortgage Performance Trends <https://www.consumerfinance.gov/data-research/mortgage-performance-trends/download-the-data/>
+3. National Financial Well-Being Survey <https://www.consumerfinance.gov/data-research/financial-well-being-survey-data/>
+4. Consumer Complaint Database <https://www.consumerfinance.gov/data-research/consumer-complaints/>
+
+#### Key Terms explained
+>
+(@) Asset<br/>
+A borrowing undertaken by an individual consumer from a lending institution such as a bank or a financial services firm, is called an asset.<br/>
+<br/>
+Every asset is characterized by
+        i) purpose (personal loan, auto loan, home mortgage, education loan, etc.)
+        ii) amount
+        iii) rate of interest (profit rate for the lending institution)
+        iv) borrowing period (tenor of the borrowing)
+<br/>
+Typically, every asset has a pre-determined repayment amount due once a month, also known as the EMI (Equal Monthly Installment), which is calculate based on the borrowing amount, rate of interest, and borrowing period.
+<br/>
+(@) Delinquent Asset<br/>
+An asset is said to be delinquent if an EMI is more than 30 days overdue, i.e. the borrower is at least 30 days behind the pre-arranged repayment schedule. Since an EMI is due every month, i.e. about every 30 days, an asset being delinquent translates to 2 or more EMIs being missed.
+<br/>
+(@) Non-Performing Asset (NPA)<br/>
+An asset is deemed as "Non Performing" if the EMI is 90+ days overdue, i.e. the borrower is at least 90 days behind the repayment schedule. This translates to 4 or more EMIs being missed.
+<br/>
+(@) Portfolio<br/>
+A portfolio is a set of various individual borrowings (assets), that are typically monitored & managed together at an aggregate level. Portfolio performance is measured in terms of revenue (interest collection) & risk (delinquency, defaults, etc.). We focus on key risk indicators as below.
+<br/>
+(@) Delinquency Rate<br/>
+The amount corresponding to delinquent assets as a proportion to the total amount lent out is called the delinquency rate. Portfolio managers typically look at delinquency and other risk indicators calculated both by count and by volume. However, the measures by volume (asset value or the borrowed amount) is much more important, and is the same tracked and made available by the CFPB.
+<br/>
+(@) NPA Rate<br/>
+The amount corresponding to non-performing assets as a proportion to the total amount lent out is called the NPA rate.
 
 ```{r setup, include=FALSE}
 
 # Load required packages
+library("rmarkdown")
 library("readr")
 library("haven")
 library("plyr")
@@ -19,6 +64,8 @@ library("zoo")
 library("lubridate")
 library("directlabels")
 library("wesanderson")
+library("maps")
+library("mapdata")
 
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
@@ -36,6 +83,9 @@ del_metro = read_csv("datasets/MetroAreaMortgagesPercent-30-89DaysLate-thru-2018
 npa_county = read_csv("datasets/CountyMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
 npa_state = read_csv("datasets/StateMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
 npa_metro = read_csv("datasets/MetroAreaMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
+
+# Load National Financial Well-Being Survey data
+nfwbs_puf = read_csv("datasets/NFWBS_PUF_2016_data.csv")
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
@@ -103,4 +153,136 @@ npa_metro_long <- gather(select(npa_metro, -c(Name, CBSACode)),
 ls()
 
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r Group By AreaType & Month}
+
+# Month-on-month Delinquency Rates by Metro Area
+del_by_metro <- del_metro_long %>% 
+  group_by(RegionType, Month) %>%
+  summarise(mean_del = mean(delinquency_rate),
+            max_del = max(delinquency_rate),
+            min_del = min(delinquency_rate),
+            del_diff = max_del - min_del)
+
+
+# Month-on-month NPA Rates by Metro Area
+npa_by_metro <- npa_metro_long %>% 
+  group_by(RegionType, Month) %>%
+  summarise(mean_npa = mean(default_rate),
+            max_npa = max(default_rate),
+            min_npa = min(default_rate),
+            npa_diff = max_npa - min_npa)
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r Merge Delinquency & NPA rates}
+
+# Check common field names
+colnames(del_by_metro)[colnames(del_by_metro) %in% colnames(npa_by_metro)]
+
+# Merge Delinquency rates and Default (NPA) rates by RegionType & Month
+tot_by_metro <- merge(del_by_metro, npa_by_metro, by=c("RegionType", "Month"))
+#tot_by_metro
+
+# Regress mean delinquency & default rates by Month & Region Type
+tot_by_metro$pred.mean_del <- predict(lm(mean_del ~ format(Month, "%m") + RegionType, 
+                                         data = tot_by_metro))
+tot_by_metro$pred.mean_npa <- predict(lm(mean_npa ~ format(Month, "%m") + RegionType, 
+                                         data = tot_by_metro))
+
+
+```
+
+
+
+```{r Plot 1}
+
+# Plot delinquency trends by Region Type
+p1 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)), 
+             aes(x=Month, 
+                 y=mean_del 
+                 ,color=RegionType
+                 ,group=RegionType
+                 )) + 
+  geom_point() + 
+  geom_line()
+
+p1 + labs(colour = "Region Type",
+          x = "Year",
+          y = "Mean Delinquency Rate [% overdue by 30-89 days]", 
+          title = "Delinquency rates have declined after an initial spike following the 2008 crisis",
+          subtitle = "seasonality patterns in delinquency are clearly visible",
+          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          tag = "A") + 
+  scale_x_date(date_labels = "%Y")
+
+```
+
+```{r Plot 2}
+
+# Plot disparity in delinquency (max - min) across states
+p2 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)),
+             aes(x=format(Month, "%m"),
+                 y=del_diff/100,
+                 fill=RegionType)) + 
+  geom_boxplot()
+
+p2 + labs(colour = "Region Type", 
+          x = "Month",
+          y = "Disparity in delinquency rate (max - min) across States", 
+          title = "Delinquency disparity across states is largely due to Metro Areas",
+          subtitle = "there is a subtle seasonal pattern even in delinquency disparity",
+          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          tag = "B") + 
+  scale_y_continuous(labels = scales::percent) + 
+  scale_x_discrete("Month")
+
+```
+
+```{r Plot 3}
+# Compare trends in delinquency and default (NPA) 
+p3 <- ggplot(filter(tot_by_metro, grepl("Metro", RegionType)),
+             aes(x=Month),
+             group=RegionType) + 
+  geom_line(aes(y=mean_del, colour=mean_del)) + 
+  geom_col(aes(y=mean_npa/3, colour=mean_npa)) + 
+  geom_dl(aes(y=mean_del, label = "delinquency"), 
+          method = list(dl.trans(x = x + 1.8, y = y - 1.2), "first.points")) +
+  geom_dl(aes(y=mean_npa/3, label = "default"), 
+          method = list(dl.trans(x = x - .8, y = y - .2), "last.points")) +
+  geom_smooth(aes(y=mean_del, group=RegionType)) + 
+  geom_smooth(aes(y=mean_npa/3, group=RegionType))
+
+p3 + scale_y_continuous(expand = c(0,0),
+                        labels = scales::comma,
+                        sec.axis = sec_axis(~.*3, name = "Mean Default (NPA) rate [% overdue by 90+ days]")) + 
+  scale_fill_gradientn(colours = terrain.colors(10)) + 
+  labs(colour = "Intensity of distress", 
+       x = "Year",
+       y = "Mean Delinquency rate [% overdue by 30-89 days]", 
+       title = "Metro and Non-Metro areas differ in Delinquency rates, but not default rates",
+       subtitle = "this indicates disparity in Collection efforts across Metro & Non-Metro areas",
+       caption = "(based on HMDA Mortgage Performance data by CFPB)",
+       tag = "C") +
+  scale_x_date(date_breaks = "1 year", 
+               date_minor_breaks = "1 month",
+               date_labels = "%Y") + 
+  theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+
+```
+
+```{r Maps}
+
+states <- map_data("state")
+
+del_state_long$Name <- tolower(del_state_long$Name)
+
+del_state_map <- merge(states, del_state_long, sort = FALSE, 
+                       by.x = "region", 
+                       by.y = "Name")
+
+ggplot(del_state_map, aes(long, lat)) + 
+  geom_polygon(aes(fill = delinquency_rate))
 ```
