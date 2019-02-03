@@ -6,6 +6,7 @@ output:
   html_document:
     toc: TRUE
     toc_float: TRUE
+    code_folding: hide
 ---
 
 ## Project Inspiration
@@ -23,30 +24,49 @@ In this document, we explore existing data made available by the Consumer Financ
 
 #### Key Terms explained
 >
-(@) Asset<br/>
-A borrowing undertaken by an individual consumer from a lending institution such as a bank or a financial services firm, is called an asset.<br/>
+(@) Asset
+<br/>
+A borrowing undertaken by an individual consumer from a lending institution such as a bank or a financial services firm, is called an asset.
+<br/>
 <br/>
 Every asset is characterized by
-        i) purpose (personal loan, auto loan, home mortgage, education loan, etc.)
-        ii) amount
-        iii) rate of interest (profit rate for the lending institution)
-        iv) borrowing period (tenor of the borrowing)
+>
+>     (i) purpose (personal loan, auto loan, home mortgage, education loan, etc.)
+>     (ii) amount (amount borrowed, also called 'principal')
+>     (iii) rate of interest (profit rate for the lending institution)
+>     (iv) borrowing period (tenor of the borrowing)
+<br/>
 <br/>
 Typically, every asset has a pre-determined repayment amount due once a month, also known as the EMI (Equal Monthly Installment), which is calculate based on the borrowing amount, rate of interest, and borrowing period.
 <br/>
-(@) Delinquent Asset<br/>
+<br/>
+(@) Delinquent Asset
+<br/>
+<br/>
 An asset is said to be delinquent if an EMI is more than 30 days overdue, i.e. the borrower is at least 30 days behind the pre-arranged repayment schedule. Since an EMI is due every month, i.e. about every 30 days, an asset being delinquent translates to 2 or more EMIs being missed.
 <br/>
-(@) Non-Performing Asset (NPA)<br/>
+<br/>
+(@) Non-Performing Asset (NPA)
+<br/>
+<br/>
 An asset is deemed as "Non Performing" if the EMI is 90+ days overdue, i.e. the borrower is at least 90 days behind the repayment schedule. This translates to 4 or more EMIs being missed.
 <br/>
-(@) Portfolio<br/>
+<br/>
+(@) Portfolio
+<br/>
+<br/>
 A portfolio is a set of various individual borrowings (assets), that are typically monitored & managed together at an aggregate level. Portfolio performance is measured in terms of revenue (interest collection) & risk (delinquency, defaults, etc.). We focus on key risk indicators as below.
 <br/>
-(@) Delinquency Rate<br/>
+<br/>
+(@) Delinquency Rate
+<br/>
+<br/>
 The amount corresponding to delinquent assets as a proportion to the total amount lent out is called the delinquency rate. Portfolio managers typically look at delinquency and other risk indicators calculated both by count and by volume. However, the measures by volume (asset value or the borrowed amount) is much more important, and is the same tracked and made available by the CFPB.
 <br/>
-(@) NPA Rate<br/>
+<br/>
+(@) NPA Rate
+<br/>
+<br/>
 The amount corresponding to non-performing assets as a proportion to the total amount lent out is called the NPA rate.
 
 ```{r setup, include=FALSE}
@@ -70,7 +90,7 @@ library("mapdata")
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
-```{r Load data}
+```{r Load data, message=FALSE}
 
 # Load Mortgage Performance data
 
@@ -89,7 +109,7 @@ nfwbs_puf = read_csv("datasets/NFWBS_PUF_2016_data.csv")
 
 ```
 
-```{r Convert data to long format}
+```{r Convert data to long format, message=FALSE}
 
 # Delinquency Rates
 ## Delinquency Rates by County
@@ -148,12 +168,11 @@ npa_metro_long <- gather(select(npa_metro, -c(Name, CBSACode)),
   mutate(Month = as.Date(paste(Month,"-01",sep="")),
          Mth = format(Month, "%b"))
 
-# Check datasets loaded
-ls()
-
+# # Check datasets loaded
+# ls()
 ```
 
-```{r Group By AreaType & Month}
+```{r Group By AreaType & Month, message=FALSE}
 
 # Month-on-month Delinquency Rates by Metro Area
 del_by_metro <- del_metro_long %>% 
@@ -174,10 +193,10 @@ npa_by_metro <- npa_metro_long %>%
 
 ```
 
-```{r Merge Delinquency & NPA rates}
+```{r Merge Delinquency & NPA rates, message=FALSE}
 
-# Check common field names
-colnames(del_by_metro)[colnames(del_by_metro) %in% colnames(npa_by_metro)]
+# # Check common field names
+# colnames(del_by_metro)[colnames(del_by_metro) %in% colnames(npa_by_metro)]
 
 # Merge Delinquency rates and Default (NPA) rates by RegionType & Month
 tot_by_metro <- merge(del_by_metro, npa_by_metro, by=c("RegionType", "Month"))
@@ -192,6 +211,24 @@ tot_by_metro$pred.mean_npa <- predict(lm(mean_npa ~ format(Month, "%m") + Region
 
 ```
 
+## Performance Trends of Housing Mortgages
+
+Since Housing is a basic need and because housing prices drive the local economy, we first analyze the housing loans or mortgages market. We will subsequently move on to analyze the auto loan and personal loan credit markets in due course of time.
+<br/>
+If a portfolio sees an increase in the risk factors discussed above, banks and financial services firms may reduce access to credit in the short term. We look at these risk indicators at 2 different geographic levels as below:
+<br/>
+
+* State-level (aggregating all mortgages in a state)
+* Region Type (aggregating "metro"" or heavily urbanized areas within a state, and comparing these against the rest of the state)
+
+### Delinquency Rates
+
+Delinquency starts at 30 days overdue, and it is often an early indicator of financial stress. We see that
+<br/>
+
+i. mean delinquency rates follow a cyclic pattern or seasonality
+delinquency is lowest at the start of a year (e.g., Feb '10 or Mar '11 or Feb '12) and increases gradually to hit the peak at the end of the year (e.g., Dec '10 or Dec '11 or Dec '12)
+ii. mean delinquency rates in the non-metro areas mirrored those in the metro areas up to 2013, post which metro areas saw lower delinquencies compared to non-metro areas
 
 
 ```{r Plot 1}
@@ -217,6 +254,16 @@ p1 + labs(colour = "Region Type",
 
 ```
 
+### Differences across States
+
+After analyzing the difference between metro and non-metro areas, we examine the difference across states. We look at the worst (highest) delinquency in metro areas across states and compare against the best (lowest) delinquency in metro areas across states. Similarly, we look at the difference between the state with the highest delinquency in non-metro areas and the state with the lowest delinquency in non-metro areas. We see that
+<br/>
+
+i. there is again a clear cyclic or seasonal pattern
+difference between worst and least delinquency is highest during December and January (around the winter & holiday season when borrowers may prioritize other imminent expenses over repaying their mortgages) and the difference decreases over the next 3-4 months before increasing again
+ii. difference is higher for metro areas in every single month
+this indicates higher disparity across states when we consider only the metro or heavily urbanized areas, as against the countryside
+
 ```{r Plot 2}
 
 # Plot disparity in delinquency (max - min) across states
@@ -238,7 +285,11 @@ p2 + labs(colour = "Region Type",
 
 ```
 
-```{r Plot 3}
+## Comparing Delinquency & NPA rates
+
+When we compare delinquency and NPA rates, we see that delinquency rates differ across metro and non-metro areas, but NPA rates remain comparable. This may indicate a differential debt collections approach and focus between metro and non-metro areas.
+
+```{r Plot 3, message=FALSE}
 # Compare trends in delinquency and default (NPA) 
 p3 <- ggplot(filter(tot_by_metro, grepl("Metro", RegionType)),
              aes(x=Month),
@@ -270,12 +321,12 @@ p3 + scale_y_continuous(expand = c(0,0),
 
 ```
 
-```{r Plot D}
+```{r Plot 4}
 
 # Convert state names to lowercase 
 del_state_long$Name <- tolower(del_state_long$Name)
 
-# Month-on-month Delinquency Rates by Metro Area
+# Month-on-month Delinquency Rates by State
 del_by_state <- del_state_long %>% 
   group_by(Name, Month) %>%
   summarise(mean_del = mean(delinquency_rate),
@@ -306,12 +357,12 @@ p4 + labs(colour = "Mean Delinquency Rate",
 
 ```
 
-```{r Plot E}
+```{r Plot 5}
 
 # Convert state names to lowercase 
 npa_state_long$Name <- tolower(npa_state_long$Name)
 
-# Month-on-month Delinquency Rates by Metro Area
+# Month-on-month Delinquency Rates by State
 npa_by_state <- npa_state_long %>% 
   group_by(Name, Month) %>%
   summarise(mean_npa = mean(default_rate),
@@ -337,4 +388,46 @@ p5 + labs(colour = "Mean NPA Rate",
           tag = "E") + 
   scale_fill_gradientn(colours = terrain.colors(10))
 
+```
+
+```{r Plot 6}
+# library("maps")
+# library("mapdata")
+counties <- map_data("county")
+
+# Convert county names to lowercase
+del_county_long$Name <- substr(tolower(del_county_long$Name), 
+                               1, 
+                               nchar(del_county_long$Name)-7)
+
+# Month-on-month Delinquency Rates by County Area
+del_by_county <- del_county_long %>%
+  group_by(Name, Month) %>%
+  summarise(mean_del = mean(delinquency_rate),
+            max_del = max(delinquency_rate),
+            min_del = min(delinquency_rate),
+            del_diff = max_del - min_del)
+
+# Merge with Map Data
+del_county_map <- merge(counties, del_by_county, all.x = TRUE, sort = FALSE, 
+                        by.x = "subregion", 
+                        by.y = "Name")
+
+p6<- ggplot(del_county_map, aes(long, lat)) + 
+  geom_polygon(aes(fill = mean_del, group=group), color="white") + 
+  coord_fixed(1.3)
+
+p6 + labs(colour = "Mean Delinquency Rate", 
+          x = "Longitude",
+          y = "Latitude", 
+          title = "Substantial differences in delinquency rates across states",
+          subtitle = "states vary widely from each other, though no regional trends seen",
+          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          tag = "F") + 
+  scale_fill_gradientn(colours = terrain.colors(10))
+
+nrow(counties)
+nrow(del_county_map)
+
+#counties[subregion]
 ```
