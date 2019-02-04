@@ -1,7 +1,7 @@
 ---
 title: "Preliminary overview of the US Financial Services market"
 author: "Darshan Sumant"
-date: "January 27, 2019"
+date: "February 3, 2019"
 output: 
   html_document:
     toc: TRUE
@@ -106,6 +106,9 @@ npa_metro = read_csv("datasets/MetroAreaMortgagesPercent-90-plusDaysLate-thru-20
 
 # Load National Financial Well-Being Survey data
 nfwbs_puf = read_csv("datasets/NFWBS_PUF_2016_data.csv")
+
+# Load Consumer Complaints Data
+complaints = read_csv("datasets/Consumer_Complaints.csv")
 
 ```
 

@@ -26,6 +26,7 @@ library("directlabels")
 library("wesanderson")
 library("maps")
 library("mapdata")
+library("openintro")
 
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
@@ -77,6 +78,12 @@ mort_comp_by_issue <- mort_comp %>%
   group_by(Issue_type, Month_received) %>%
   summarise(num_complaints = n())
 
+
+# Group by Issue Type
+mort_comp_by_state <- filter(mort_comp, Year_received == 2017) %>% 
+  group_by(Issue_type, State) %>%
+  summarise(num_complaints = n())
+
 ```
 
 ```{r Plot}
@@ -112,4 +119,43 @@ p3 <- ggplot(mort_comp_by_issue,
   geom_bar(stat = "identity")
 
 p3
+```
+
+```{r by State}
+p4 <- ggplot(mort_comp_by_state, 
+             aes(x=State,
+                 y=num_complaints,
+                 fill=Issue_type)) + 
+  geom_bar(stat = "identity")
+
+p4
+```
+
+```{r State maps}
+states <- map_data("state")
+
+# Convert state names to full names in lowercase 
+mort_comp_by_state$Statename <- tolower(abbr2state(mort_comp_by_state$State))
+
+glimpse(mort_comp_by_state)
+
+# Merge with Map Data
+comp_state_map <- merge(states, 
+                        filter(mort_comp_by_state, Issue_type == "Stressed"), 
+                        sort = FALSE, 
+                        by.x = "region", 
+                        by.y = "Statename")
+
+p5<- ggplot(comp_state_map, aes(long, lat)) + 
+  geom_polygon(aes(fill = num_complaints, group=group), color="white") + 
+  coord_fixed(1.3)
+
+p5 + labs(colour = "Self-reported Financial Stress", 
+          x = "",
+          y = "",
+          title = "Self-reporting of Financial Stress varies widely across states",
+          subtitle = "states vary widely from each other, though no regional trends seen",
+          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          tag = "F") + 
+  scale_fill_gradientn(colours = terrain.colors(10))
 ```
