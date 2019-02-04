@@ -429,8 +429,4 @@ p6 + labs(colour = "Mean Delinquency Rate",
           tag = "F") + 
   scale_fill_gradientn(colours = terrain.colors(10))
 
-nrow(counties)
-nrow(del_county_map)
-
-#counties[subregion]
 ```

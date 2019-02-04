@@ -43,6 +43,7 @@ complaints = read_csv("datasets/Consumer_Complaints.csv")
 # Rectify column names
 colnames(complaints) = gsub(" ", "_",colnames(complaints))
 colnames(complaints) = gsub("-", "_",colnames(complaints))
+colnames(complaints) = gsub("?", "",colnames(complaints))
 
 ```
 
@@ -263,4 +264,37 @@ p8
 ```
 
 ```{r Check}
+table(mort_comp$Company_response_to_consumer)
+
+# Group by Issue Type & Month
+mort_resp_by_issue <- mort_comp %>% 
+  group_by(Issue_type, Month_received, 'Timely_response?') %>%
+  summarise(num_complaints = n())
+
+# Response Rate by Issue Type & Month
+mort_resp_by_issue <- mort_resp_by_issue %>% 
+  group_by(Issue_type, Month_received) %>%
+  mutate(resp_rate = num_complaints / sum(num_complaints))
+
+# Trends in timeliness of Response
+p9 <- ggplot(filter(mort_resp_by_issue, grepl("Yes", 'Timely_response?')), 
+             aes(x=Month_received, 
+                 y=resp_rate,
+                 color=Issue_type,
+                 group=Issue_type
+                 )) + 
+  geom_point() + 
+  geom_line()
+
+p9
+# # Group by Issue Type & State
+# mort_comp_by_state <- filter(mort_comp, Year_received == 2017) %>% 
+#   group_by(Issue_type, State) %>%
+#   summarise(num_complaints = n())
+# 
+# # Calculate %complaints by State that are Stress related
+# mort_comp_by_state <- mort_comp_by_state %>%
+#   group_by(State) %>%
+#   mutate(comp_perc = num_complaints / sum(num_complaints))
+
 ```
