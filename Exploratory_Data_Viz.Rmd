@@ -260,7 +260,15 @@ p1 + labs(colour = "Region Type",
           subtitle = "seasonality patterns in delinquency are clearly visible",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "A") + 
-  scale_x_date(date_labels = "%Y")
+  scale_x_date(date_breaks = "1 year", 
+               date_minor_breaks = "1 month",
+               date_labels = "%Y") + 
+  theme(plot.title = element_text(size = rel(2)),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        panel.grid.major = element_line(colour = "black"),
+        axis.text = element_text(colour = "blue"),
+        axis.ticks = element_line(size = 2),
+        legend.position = "bottom")
 
 ```
 
@@ -291,7 +299,11 @@ p2 + labs(colour = "Region Type",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "B") + 
   scale_y_continuous(labels = scales::percent) + 
-  scale_x_discrete("Month")
+  scale_x_discrete("Month") + 
+  theme(plot.title = element_text(size = rel(2)),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        axis.ticks = element_line(size = 2),
+        legend.position = "top")
 
 ```
 
@@ -327,7 +339,9 @@ p3 + scale_y_continuous(expand = c(0,0),
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  theme(panel.background = element_rect(fill = "white", colour = "grey50"))
+  theme(plot.title = element_text(size = rel(2)),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        axis.ticks = element_line(size = 2))
 
 ```
 
@@ -410,7 +424,10 @@ p5 + labs(colour = "Mean NPA Rate",
           subtitle = "Collections focus seems to vary widely across states",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "E") + 
-  scale_fill_gradientn(colours = terrain.colors(10))
+  scale_fill_gradientn(colours = terrain.colors(10)) + 
+  theme(plot.title = element_text(size = rel(2)),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        axis.ticks = element_line(size = 2))
 
 ```
 
@@ -530,7 +547,14 @@ p7 + labs(colour = "Complaint Type",
           title = "Most complaints are associated with consumers facing financial stress",
           subtitle = "Every month, over 500 consumers report being late on mortgage payments",
           caption = "(based on Consumer Complaints received by the CFPB)",
-          tag = "F")
+          tag = "F") + 
+  scale_x_date(date_breaks = "1 year", 
+               date_minor_breaks = "1 month",
+               date_labels = "%Y") + 
+  theme(plot.title = element_text(size = rel(2)),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        axis.ticks = element_line(size = 2))
+
 ```
 
 ### Comparing across States
@@ -564,5 +588,9 @@ p8 + labs(colour = "Mean NPA Rate",
           subtitle = "Over 40% of consumer complaints received from NY, CA, IL, MA, NJ indicate financial stress",
           caption = "(based on Consumer Complaints received by the CFPB)",
           tag = "G") + 
-  scale_fill_gradientn(colours = terrain.colors(10))
+  scale_fill_gradientn(colours = terrain.colors(10)) + 
+  theme(plot.title = element_text(size = rel(2)),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        axis.ticks = element_line(size = 2))
+
 ```
