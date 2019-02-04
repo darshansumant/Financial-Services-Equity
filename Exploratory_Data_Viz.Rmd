@@ -86,6 +86,8 @@ library("directlabels")
 library("wesanderson")
 library("maps")
 library("mapdata")
+library("openintro")
+library("grid")
 
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
@@ -109,6 +111,11 @@ nfwbs_puf = read_csv("datasets/NFWBS_PUF_2016_data.csv")
 
 # Load Consumer Complaints Data
 complaints = read_csv("datasets/Consumer_Complaints.csv")
+
+# Rectify column names
+colnames(complaints) = gsub(" ", "_",colnames(complaints))
+colnames(complaints) = gsub("-", "_",colnames(complaints))
+colnames(complaints) = gsub("?", "",colnames(complaints))
 
 ```
 
@@ -432,4 +439,77 @@ p6<- ggplot(del_county_map, aes(long, lat)) +
 #           tag = "F") + 
 #   scale_fill_gradientn(colours = terrain.colors(10))
 
+```
+
+## Insights from Consumer Complaints
+
+```{r Complaints data transformations, message=FALSE}
+
+# Transform Date complaint received by CFPB
+complaints$Date_received <- as.Date(complaints$Date_received, "%m/%d/%Y")
+complaints$Year_received <- as.numeric(format(complaints$Date_received, "%Y"))
+complaints$Month_received <- floor_date(complaints$Date_received, "month")
+
+# Transform Date complaint sent by CFPB to Company
+complaints$Date_sent_to_company <- as.Date(complaints$Date_sent_to_company, "%m/%d/%Y")
+complaints$Year_sent_to_company <- as.numeric(format(complaints$Date_sent_to_company, "%Y"))
+complaints$Month_sent_to_company <- floor_date(complaints$Date_sent_to_company, "month")
+
+# Filter out only Mortgage-related complaints
+mort_comp <- filter(complaints, 
+                    Product == "Mortgage" & grepl("Conventional", Sub_product))
+
+# Re-classify Complaint Types
+mort_comp <- mort_comp %>% mutate(
+  Issue_type = case_when(
+    grepl("Appl", Issue) ~ "Accessibility",
+    Issue == "Credit decision / Underwriting" ~ "Accessibility",
+    Issue == "Struggling to pay mortgage" ~ "Stressed",
+    grepl("collection", Issue) ~ "Stressed",
+    grepl("escrow", Issue) ~ "Servicing",
+    Issue == "Trouble during payment process" ~ "Servicing",
+    TRUE ~ "Other"
+    )
+  )
+
+```
+
+```{r Group by}
+
+# Count of complaints received by Issue Type & Month
+mort_comp_by_issue <- mort_comp %>% 
+  group_by(Issue_type, Month_received) %>%
+  summarise(num_complaints = n())
+
+# Count of complaints received by Issue Type & State
+mort_comp_by_state <- filter(mort_comp, Year_received == 2017) %>% 
+  group_by(Issue_type, State) %>%
+  summarise(num_complaints = n())
+
+# Calculate %complaints by State that are Stress related
+mort_comp_by_state <- mort_comp_by_state %>%
+  group_by(State) %>%
+  mutate(comp_perc = num_complaints / sum(num_complaints))
+
+```
+
+```{r Complaint trends}
+
+# Plot monthly volume of complaints received by the CFPB
+p7 <- ggplot(mort_comp_by_issue, 
+             aes(x=Month_received,
+                 y=num_complaints,
+                 fill=Issue_type,
+                 group=Issue_type)) + 
+  geom_area() + 
+  geom_line(aes(ymax=num_complaints),
+            position = "stack")
+
+p7 + labs(colour = "Complaint Type", 
+          x = "Month",
+          y = "No. of Consumer Complaints", 
+          title = "Most complaints are associated with consumers facing financial stress",
+          subtitle = "Every month, over 500 consumers report being late on mortgage payments",
+          caption = "(based on Consumer Complaints received by the CFPB)",
+          tag = "F")
 ```
