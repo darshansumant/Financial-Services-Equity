@@ -288,7 +288,7 @@ p2 + labs(colour = "Region Type",
 
 ```
 
-## Comparing Delinquency & NPA rates
+## Comparing tredns in Delinquency & NPA rates
 
 When we compare delinquency and NPA rates, we see that delinquency rates differ across metro and non-metro areas, but NPA rates remain comparable. This may indicate a differential debt collections approach and focus between metro and non-metro areas.
 
@@ -324,6 +324,10 @@ p3 + scale_y_continuous(expand = c(0,0),
 
 ```
 
+## Examining Inter-State differences in Delinquency & NPA rates
+
+When we compare delinquency and NPA rates, we see that delinquency rates differ across metro and non-metro areas, but NPA rates remain comparable. This may indicate a differential debt collections approach and focus between metro and non-metro areas.
+
 ```{r Plot 4}
 
 # Convert state names to lowercase 
@@ -331,7 +335,7 @@ del_state_long$Name <- tolower(del_state_long$Name)
 
 # Month-on-month Delinquency Rates by State
 del_by_state <- del_state_long %>% 
-  group_by(Name, Month) %>%
+  group_by(Name) %>%
   summarise(mean_del = mean(delinquency_rate),
             max_del = max(delinquency_rate),
             min_del = min(delinquency_rate),
@@ -352,8 +356,8 @@ p4<- ggplot(del_state_map, aes(long, lat)) +
 p4 + labs(colour = "Mean Delinquency Rate", 
           x = "Longitude",
           y = "Latitude", 
-          title = "Substantial differences in delinquency rates across states",
-          subtitle = "states vary widely from each other, though no regional trends seen",
+          title = "Mortgage delinquency is higher in the Southern states",
+          subtitle = "Mississippi has the highest mortgage delinquency",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "D") + 
   scale_fill_gradientn(colours = terrain.colors(10))
@@ -367,7 +371,7 @@ npa_state_long$Name <- tolower(npa_state_long$Name)
 
 # Month-on-month Delinquency Rates by State
 npa_by_state <- npa_state_long %>% 
-  group_by(Name, Month) %>%
+  group_by(Name) %>%
   summarise(mean_npa = mean(default_rate),
             max_npa = max(default_rate),
             min_npa = min(default_rate),
@@ -385,8 +389,8 @@ p5<- ggplot(npa_state_map, aes(long, lat)) +
 p5 + labs(colour = "Mean NPA Rate", 
           x = "Longitude",
           y = "Latitude", 
-          title = "Unlike delinquency, NPA rates do not vary as much across states",
-          subtitle = "states with higher delinquency rates may be focusing more on debt collections",
+          title = "Not all Southern states have the worst NPA rates, unlike delinquency",
+          subtitle = "Collections focus seems to vary widely across states",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "E") + 
   scale_fill_gradientn(colours = terrain.colors(10))
@@ -394,8 +398,7 @@ p5 + labs(colour = "Mean NPA Rate",
 ```
 
 ```{r Plot 6}
-# library("maps")
-# library("mapdata")
+
 counties <- map_data("county")
 
 # Convert county names to lowercase
@@ -420,13 +423,13 @@ p6<- ggplot(del_county_map, aes(long, lat)) +
   geom_polygon(aes(fill = mean_del, group=group), color="white") + 
   coord_fixed(1.3)
 
-p6 + labs(colour = "Mean Delinquency Rate", 
-          x = "Longitude",
-          y = "Latitude", 
-          title = "Substantial differences in delinquency rates across states",
-          subtitle = "states vary widely from each other, though no regional trends seen",
-          caption = "(based on HMDA Mortgage Performance data by CFPB)",
-          tag = "F") + 
-  scale_fill_gradientn(colours = terrain.colors(10))
+# p6 + labs(colour = "Mean Delinquency Rate", 
+#           x = "Longitude",
+#           y = "Latitude", 
+#           title = "Substantial differences in delinquency rates across states",
+#           subtitle = "states vary widely from each other, though no regional trends seen",
+#           caption = "(based on HMDA Mortgage Performance data by CFPB)",
+#           tag = "F") + 
+#   scale_fill_gradientn(colours = terrain.colors(10))
 
 ```
