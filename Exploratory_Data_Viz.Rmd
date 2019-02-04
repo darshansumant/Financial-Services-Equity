@@ -263,7 +263,7 @@ p1 + labs(colour = "Region Type",
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  theme(plot.title = element_text(size = rel(2)),
+  theme(plot.title = element_text(size = rel(1.2)),
         panel.background = element_rect(fill = "white", colour = "grey50"),
         panel.grid.major = element_line(colour = "black"),
         axis.text = element_text(colour = "blue"),
@@ -300,7 +300,7 @@ p2 + labs(colour = "Region Type",
           tag = "B") + 
   scale_y_continuous(labels = scales::percent) + 
   scale_x_discrete("Month") + 
-  theme(plot.title = element_text(size = rel(2)),
+  theme(plot.title = element_text(size = rel(1.2)),
         panel.background = element_rect(fill = "white", colour = "grey50"),
         axis.ticks = element_line(size = 2),
         legend.position = "top")
@@ -339,8 +339,7 @@ p3 + scale_y_continuous(expand = c(0,0),
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  theme(plot.title = element_text(size = rel(2)),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
+  theme(panel.background = element_rect(fill = "white", colour = "grey50"),
         axis.ticks = element_line(size = 2))
 
 ```
@@ -378,13 +377,17 @@ p4<- ggplot(del_state_map, aes(long, lat)) +
   coord_fixed(1.3)
 
 p4 + labs(colour = "Mean Delinquency Rate", 
-          x = "Longitude",
-          y = "Latitude", 
+          x = "",
+          y = "", 
           title = "Mortgage delinquency is higher in the Southern states",
           subtitle = "Mississippi has the highest mortgage delinquency",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "D") + 
-  scale_fill_gradientn(colours = terrain.colors(10))
+  scale_fill_gradientn(colours = terrain.colors(10)) + 
+  theme(plot.title = element_text(size = rel(1.2)),
+        panel.background = element_rect(fill = "white", colour = "grey50"),
+        axis.ticks = element_line(size = 2),
+        axis.text = element_blank())
 
 ```
 
@@ -418,16 +421,17 @@ p5<- ggplot(npa_state_map, aes(long, lat)) +
   coord_fixed(1.3)
 
 p5 + labs(colour = "Mean NPA Rate", 
-          x = "Longitude",
-          y = "Latitude", 
+          x = "",
+          y = "", 
           title = "Not all Southern states have the worst NPA rates, unlike delinquency",
           subtitle = "Collections focus seems to vary widely across states",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "E") + 
   scale_fill_gradientn(colours = terrain.colors(10)) + 
-  theme(plot.title = element_text(size = rel(2)),
+  theme(plot.title = element_text(size = rel(1.2)),
         panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.ticks = element_line(size = 2))
+        axis.ticks = element_line(size = 2),
+        axis.text = element_blank())
 
 ```
 
@@ -551,7 +555,7 @@ p7 + labs(colour = "Complaint Type",
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  theme(plot.title = element_text(size = rel(2)),
+  theme(plot.title = element_text(size = rel(1.2)),
         panel.background = element_rect(fill = "white", colour = "grey50"),
         axis.ticks = element_line(size = 2))
 
@@ -582,15 +586,16 @@ p8 <- ggplot(comp_state_map, aes(long, lat)) +
   coord_fixed(1.3)
 
 p8 + labs(colour = "Mean NPA Rate", 
-          x = "Longitude",
-          y = "Latitude", 
+          x = "",
+          y = "", 
           title = "Falling behind on mortgage payments is the #1 concern across major cities",
           subtitle = "Over 40% of consumer complaints received from NY, CA, IL, MA, NJ indicate financial stress",
           caption = "(based on Consumer Complaints received by the CFPB)",
           tag = "G") + 
   scale_fill_gradientn(colours = terrain.colors(10)) + 
-  theme(plot.title = element_text(size = rel(2)),
+  theme(plot.title = element_text(size = rel(1.2)),
         panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.ticks = element_line(size = 2))
+        axis.ticks = element_line(size = 2),
+        axis.text = element_blank())
 
 ```
