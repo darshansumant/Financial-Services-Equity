@@ -1,0 +1,115 @@
+---
+title: "Exploring Consumer Complaints"
+author: "Darshan Sumant"
+date: "February 3, 2019"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+
+# Load required packages
+library("rmarkdown")
+library("readr")
+library("haven")
+library("plyr")
+library("dplyr")
+library("tidyr")
+library("stringr")
+library("ggplot2")
+library("zoo")
+library("lubridate")
+library("directlabels")
+library("wesanderson")
+library("maps")
+library("mapdata")
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r Load data, message=FALSE}
+
+# Load National Financial Well-Being Survey data
+nfwbs_puf = read_csv("datasets/NFWBS_PUF_2016_data.csv")
+
+# Load Consumer Complaints Data
+complaints = read_csv("datasets/Consumer_Complaints.csv")
+
+# Rectify column names
+colnames(complaints) = gsub(" ", "_",colnames(complaints))
+colnames(complaints) = gsub("-", "_",colnames(complaints))
+
+```
+
+```{r Convert data to long format, message=FALSE}
+
+# Transform Date complaint received by CFPB
+complaints$Date_received <- as.Date(complaints$Date_received, "%m/%d/%Y")
+complaints$Year_received <- as.numeric(format(complaints$Date_received, "%Y"))
+complaints$Month_received <- floor_date(complaints$Date_received, "month")
+
+# Transform Date complaint sent by CFPB to Company
+complaints$Date_sent_to_company <- as.Date(complaints$Date_sent_to_company, "%m/%d/%Y")
+complaints$Year_sent_to_company <- as.numeric(format(complaints$Date_sent_to_company, "%Y"))
+complaints$Month_sent_to_company <- floor_date(complaints$Date_sent_to_company, "month")
+
+# Filter out only Mortgage-related complaints
+mort_comp <- filter(complaints, Product == "Mortgage" & grepl("Conventional", Sub_product))
+
+# Re-classify Complaint Types
+mort_comp <- mort_comp %>% mutate(
+  Issue_type = case_when(
+    grepl("Appl", Issue) ~ "Accessibility",
+    Issue == "Credit decision / Underwriting" ~ "Accessibility",
+    Issue == "Struggling to pay mortgage" ~ "Stressed",
+    grepl("collection", Issue) ~ "Stressed",
+    grepl("escrow", Issue) ~ "Servicing",
+    Issue == "Trouble during payment process" ~ "Servicing",
+    TRUE ~ "Other"
+    )
+  )
+
+# Group by Issue Type
+mort_comp_by_issue <- mort_comp %>% 
+  group_by(Issue_type, Month_received) %>%
+  summarise(num_complaints = n())
+
+```
+
+```{r Plot}
+p1 <- ggplot(mort_comp_by_issue, 
+             aes(x=Month_received,
+                 y=num_complaints,
+                 color=Issue_type,
+                 group=Issue_type)) + 
+  geom_point() + 
+  geom_line()
+
+p1
+```
+
+```{r Plot2}
+p2 <- ggplot(mort_comp_by_issue, 
+             aes(x=Month_received,
+                 y=num_complaints,
+                 fill=Issue_type,
+                 group=Issue_type)) + 
+  geom_area() + 
+  geom_line(aes(ymax=num_complaints),
+            position = "stack")
+
+p2
+```
+
+```{r Plot3}
+p3 <- ggplot(mort_comp_by_issue, 
+             aes(x=Month_received,
+                 y=num_complaints,
+                 fill=Issue_type)) + 
+  geom_bar(stat = "identity")
+
+p3
+```
