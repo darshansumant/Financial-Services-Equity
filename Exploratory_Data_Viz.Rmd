@@ -295,7 +295,7 @@ p2 + labs(colour = "Region Type",
 
 ```
 
-## Comparing tredns in Delinquency & NPA rates
+## Comparing trends in Delinquency & NPA rates
 
 When we compare delinquency and NPA rates, we see that delinquency rates differ across metro and non-metro areas, but NPA rates remain comparable. This may indicate a differential debt collections approach and focus between metro and non-metro areas.
 
@@ -331,9 +331,12 @@ p3 + scale_y_continuous(expand = c(0,0),
 
 ```
 
-## Examining Inter-State differences in Delinquency & NPA rates
+## Examining Inter-State differences in Delinquency rates
 
-When we compare delinquency and NPA rates, we see that delinquency rates differ across metro and non-metro areas, but NPA rates remain comparable. This may indicate a differential debt collections approach and focus between metro and non-metro areas.
+A closer look at average delinquency rates by State indicates:
+
+* Southern states have much higher mortgage delinquencies, as compared to the rest of the country
+* Delinquencies in high population density areas such as New York, California, Illinois, Massachusetts, New Jersey are well below 3%
 
 ```{r Plot 4}
 
@@ -370,6 +373,13 @@ p4 + labs(colour = "Mean Delinquency Rate",
   scale_fill_gradientn(colours = terrain.colors(10))
 
 ```
+
+## Inter-State differences in NPA rates
+
+NPA rates aggregated at the State level present a different picture:
+
+* Among the Southern states, Florida has a much worse NPA rate (about 5%) as compared to Texas (about 2%)
+* This indicates very different Delinquency to NPA flow rates across States, which in turn indicate towards disparity in Collections focus & effort by state
 
 ```{r Plot 5}
 
