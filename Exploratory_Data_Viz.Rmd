@@ -443,6 +443,8 @@ p6<- ggplot(del_county_map, aes(long, lat)) +
 
 ## Insights from Consumer Complaints
 
+The Consumer Financial Protection Bureau receives thousands of complaints from consumers every week, which are sent to the relevant banking or financial services provider for response. CFPB monitors every complaint for timely and accurate closure.
+
 ```{r Complaints data transformations, message=FALSE}
 
 # Transform Date complaint received by CFPB
@@ -493,6 +495,13 @@ mort_comp_by_state <- mort_comp_by_state %>%
 
 ```
 
+### Trends in Mortgage related complaints
+
+Complaints related to Mortgages received from 2012 indicate
+
+* most complaints received are raised by well-meaning consumers self-reporting financial stress and indicating that they are falling behind on their monthly payments
+* there is however a gradual decline in such complaints since late 2015
+
 ```{r Complaint trends}
 
 # Plot monthly volume of complaints received by the CFPB
@@ -514,6 +523,13 @@ p7 + labs(colour = "Complaint Type",
           tag = "F")
 ```
 
+### Comparing across States
+
+Comparing complaints received across states we see that:
+
+* Highly populous states such as New York, California, Illinois, Massachusetts, New Jersey receive complaints related to self-reported financial stress more than 40% of the time
+* Even neighboring states vary widely, such as North Dakota (over 65%) compared to Montana (less than 20%)
+
 ```{r Self reporting proportion by State}
 
 # Convert state names to full names in lowercase 
@@ -534,7 +550,7 @@ p8 <- ggplot(comp_state_map, aes(long, lat)) +
 p8 + labs(colour = "Mean NPA Rate", 
           x = "Longitude",
           y = "Latitude", 
-          title = "Falling behind on mortgage payments is the #1 concern for across major cities",
+          title = "Falling behind on mortgage payments is the #1 concern across major cities",
           subtitle = "Over 40% of consumer complaints received from NY, CA, IL, MA, NJ indicate financial stress",
           caption = "(based on Consumer Complaints received by the CFPB)",
           tag = "G") + 
