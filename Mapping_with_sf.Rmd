@@ -1,0 +1,63 @@
+---
+title: "Mapping with sf"
+author: "Darshan Sumant"
+date: "February 10, 2019"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    code_folding: hide
+---
+
+```{r setup, include=FALSE}
+
+# Load required packages
+library("rmarkdown")
+library("readr")
+library("haven")
+library("plyr")
+library("dplyr")
+library("tidyr")
+library("stringr")
+library("ggplot2")
+library("zoo")
+library("lubridate")
+library("directlabels")
+library("wesanderson")
+library("ggmap")
+library("maps")
+library("mapdata")
+library("openintro")
+library("grid")
+
+# library(c("cowplot", "googleway", "ggrepel", "ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
+library("cowplot")
+library("googleway")
+library("ggrepel")
+library("ggspatial")
+library("sf")
+library("rnaturalearth")
+library("rnaturalearthdata")
+
+register_google(key = "AIzaSyCvTsf9fTcIeH9d7WkTVxvYQzu80Hs-EvQ")
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r test}
+dc_loc <- geocode("Washington, D.C.")
+dc_map <- qmap(c(lon=dc_loc$lon, lat=dc_loc$lat), source="google", zoom=12)
+dc_map
+
+ph_loc <- geocode("Philadelphia")
+ph_map <- qmap(c(lon=ph_loc$lon, lat=ph_loc$lat), source="google", zoom=12)
+ph_map
+
+ny_loc <- geocode("New York")
+ny_map <- qmap(c(lon=ny_loc$lon, lat=ny_loc$lat), source="google", zoom=12)
+ny_map
+
+lv_loc <- geocode("Clark County, N.V.")
+lv_map <- qmap(c(lon=lv_loc$lon, lat=lv_loc$lat), source="google", zoom=12)
+lv_map
+```
