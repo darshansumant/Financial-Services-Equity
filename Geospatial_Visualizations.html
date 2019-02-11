@@ -339,10 +339,8 @@ phl_dist$nudge_x[phl_dist$OBJECTID == 4] &lt;- 0.5
 phl_dist$nudge_x[phl_dist$OBJECTID == 2] &lt;- 0.5</code></pre>
 <pre class="r"><code># Plot Districts on Top of Geocoded Maptile
 ggmap(ph_map) +
-  geom_sf(data = phl_dist, inherit.aes = FALSE, 
-          fill=NA, color=&quot;blue&quot;) +
-  geom_sf(data = phl_taxdel, inherit.aes = FALSE, 
-          fill=&quot;red&quot;, color=gray(0.5)) + 
+  geom_sf(data = phl_dist, inherit.aes = FALSE, fill=NA, color=&quot;blue&quot;) +
+  geom_sf(data = phl_taxdel, inherit.aes = FALSE, fill=&quot;red&quot;, color=gray(0.5)) + 
   geom_label(data = phl_dist, inherit.aes = FALSE, 
              aes(X, Y, label = OBJECTID), size = 5, fontface = &quot;bold&quot;,
              nudge_y = phl_dist$nudge_y,
