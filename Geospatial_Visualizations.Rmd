@@ -33,7 +33,6 @@ library("tools")
 library("maptools")
 library("lwgeom")
 
-# library(c("cowplot", "googleway", "ggrepel", "ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
 library("rgeos")
 library("cowplot")
 library("googleway")
@@ -43,6 +42,9 @@ library("sf")
 library("rnaturalearth")
 library("rnaturalearthdata")
 library("zipcode")
+
+library("cartogram")
+library("recmap")
 
 register_google(key = "AIzaSyCvTsf9fTcIeH9d7WkTVxvYQzu80Hs-EvQ")
 
@@ -91,35 +93,33 @@ phl_dist$nudge_x[phl_dist$OBJECTID == 10] <- 1.5
 
 ```{r Map}
 
-
-
 # Plot Districts on Top of Geocoded Maptile
 ggmap(ph_map) +
-  geom_sf(data = phl_dist, 
-          inherit.aes = FALSE, 
-          fill=NA, 
+  geom_sf(data = phl_dist,
+          inherit.aes = FALSE,
+          fill=NA,
           color="red",
           size = 2) +
-  geom_sf(data = phl_taxdel, 
-          inherit.aes = FALSE, 
-          aes(color = num_years_, size = total_asse)) + 
-  scale_colour_viridis_c("No. of Years\nTax unpaid", 
-                         alpha = .75, 
-                         trans = "identity") + 
-  scale_size_area("Property\nValue", 
-                  trans = "identity", 
-                  breaks = c(0, 250000, 500000, 750000, 1000000)) + 
-  geom_label(data = phl_dist, inherit.aes = FALSE, 
+  geom_sf(data = phl_taxdel,
+          inherit.aes = FALSE,
+          aes(color = num_years_, size = total_asse)) +
+  scale_colour_viridis_c("No. of Years\nTax unpaid",
+                         alpha = .75,
+                         trans = "identity") +
+  scale_size_area("Property\nValue",
+                  trans = "identity",
+                  breaks = c(0, 250000, 500000, 750000, 1000000)) +
+  geom_label(data = phl_dist, inherit.aes = FALSE,
              aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
              nudge_y = phl_dist$nudge_y,
-             nudge_x = phl_dist$nudge_x) + 
+             nudge_x = phl_dist$nudge_x) +
   coord_sf(xlim = c(-75.30, -74.95), ylim = c(39.85, 40.15), expand = TRUE) +
-  xlab("") + 
-  ylab("") + 
-  ggtitle("Serious Tax delinquencies in Center City\nDistricts tend to be more recent", 
-          subtitle = "Northern & Western suburban districts have properties with\ntaxes unpaid for 7+ years") + 
-  theme(plot.title = element_text(size = 18, lineheight=.8, hjust = 0, face="bold"), 
-        plot.subtitle = element_text(size = 14, lineheight=.8, face="italic"), 
+  xlab("") +
+  ylab("") +
+  ggtitle("Serious Tax delinquencies in Center City\nDistricts tend to be more recent",
+          subtitle = "Northern & Western suburban districts have properties with\ntaxes unpaid for 7+ years") +
+  theme(plot.title = element_text(size = 18, lineheight=.8, hjust = 0, face="bold"),
+        plot.subtitle = element_text(size = 14, lineheight=.8, face="italic"),
         legend.title = element_text(size=10, face="italic"),
         legend.text = element_text(size=10),
         axis.text.x = element_blank(),
@@ -131,81 +131,102 @@ ggmap(ph_map) +
 
 ```
 
+## Cartogram of Financial Stress self-reported by Customers
+
+```{r Consumer Complaints by State}
+
+# Load Consumer Complaints Data
+complaints = read_csv("datasets/Consumer_Complaints.csv")
+
+# Rectify column names
+colnames(complaints) = gsub(" ", "_",colnames(complaints))
+colnames(complaints) = gsub("-", "_",colnames(complaints))
+colnames(complaints) = gsub("?", "",colnames(complaints))
+
+# Filter out Mortgage-related complaints
+complaints = subset(complaints,
+                    Product == "Mortgage" & 
+                      grepl("Conventional", Sub_product))
+
+# Transform Date complaint received by CFPB
+complaints$Date_received <- as.Date(complaints$Date_received, "%m/%d/%Y")
+complaints$Year_received <- as.numeric(format(complaints$Date_received, "%Y"))
+complaints$Month_received <- floor_date(complaints$Date_received, "month")
+
+# Transform Date complaint sent by CFPB to Company
+complaints$Date_sent_to_company <- as.Date(complaints$Date_sent_to_company, "%m/%d/%Y")
+complaints$Year_sent_to_company <- as.numeric(format(complaints$Date_sent_to_company, "%Y"))
+complaints$Month_sent_to_company <- floor_date(complaints$Date_sent_to_company, "month")
+
+# Re-classify Complaint Types
+mort_comp <- complaints %>% mutate(
+  Issue_type = case_when(
+    grepl("Appl", Issue) ~ "Accessibility",
+    Issue == "Credit decision / Underwriting" ~ "Accessibility",
+    Issue == "Struggling to pay mortgage" ~ "Stressed",
+    grepl("collection", Issue) ~ "Stressed",
+    grepl("escrow", Issue) ~ "Servicing",
+    Issue == "Trouble during payment process" ~ "Servicing",
+    TRUE ~ "Other"
+    )
+  )
+
+# Group by Issue Type & Month
+mort_comp_by_issue <- mort_comp %>%
+  group_by(Issue_type, Month_received) %>%
+  summarise(num_complaints = n())
 
 
-```{r Catrogram}
-# 
-# # Load Consumer Complaints Data
-# complaints = read_csv("datasets/Consumer_Complaints.csv")
-# 
-# # Rectify column names
-# colnames(complaints) = gsub(" ", "_",colnames(complaints))
-# colnames(complaints) = gsub("-", "_",colnames(complaints))
-# colnames(complaints) = gsub("?", "",colnames(complaints))
-# 
-# # Filter out New York State records for Mortgage products
-# complaints = subset(complaints, 
-#                     State == "NY" & 
-#                       Product == "Mortgage" & 
-#                       grepl("Conventional", Sub_product))
-# 
-# # Transform Date complaint received by CFPB
-# complaints$Date_received <- as.Date(complaints$Date_received, "%m/%d/%Y")
-# complaints$Year_received <- as.numeric(format(complaints$Date_received, "%Y"))
-# complaints$Month_received <- floor_date(complaints$Date_received, "month")
-# 
-# # Transform Date complaint sent by CFPB to Company
-# complaints$Date_sent_to_company <- as.Date(complaints$Date_sent_to_company, "%m/%d/%Y")
-# complaints$Year_sent_to_company <- as.numeric(format(complaints$Date_sent_to_company, "%Y"))
-# complaints$Month_sent_to_company <- floor_date(complaints$Date_sent_to_company, "month")
-# 
-# # Re-classify Complaint Types
-# mort_comp <- complaints %>% mutate(
-#   Issue_type = case_when(
-#     grepl("Appl", Issue) ~ "Accessibility",
-#     Issue == "Credit decision / Underwriting" ~ "Accessibility",
-#     Issue == "Struggling to pay mortgage" ~ "Stressed",
-#     grepl("collection", Issue) ~ "Stressed",
-#     grepl("escrow", Issue) ~ "Servicing",
-#     Issue == "Trouble during payment process" ~ "Servicing",
-#     TRUE ~ "Other"),
-#   ZIP_code = str_pad(ZIP_code, pad="0", side = "left", width = 5)
-#   )
-# 
-# # Group by Issue Type & Month
-# mort_comp_by_issue <- mort_comp %>% 
-#   group_by(Issue_type, Month_received) %>%
-#   summarise(num_complaints = n())
-# 
-# 
-# # Group by Issue Type & ZIP
-# mort_comp_by_ZIP <- filter(mort_comp, Year_received >= 2009) %>% 
-#   group_by(Issue_type, ZIP_code) %>%
-#   summarise(num_complaints = n())
-# 
-# # Calculate %complaints by State that are Stress related
-# mort_comp_by_ZIP <- mort_comp_by_ZIP %>%
-#   group_by(ZIP_code) %>%
-#   mutate(comp_perc = num_complaints / sum(num_complaints))
+# Group by Issue Type & State
+mort_comp_by_state <- filter(mort_comp, Year_received >= 2009) %>%
+  group_by(Issue_type, State) %>%
+  summarise(num_complaints = n())
+
+# Calculate %complaints by State that are Stress related
+mort_comp_by_state <- mort_comp_by_state %>%
+  group_by(State) %>%
+  mutate(comp_perc = num_complaints / sum(num_complaints))
 
 ```
+```{r Cartogram}
 
-```{r NYC Map}
-# ny_map <- get_map(location = "New York", zoom = 12)
-# ggmap(ny_map)
-# 
-# data("zipcode")
-# map_by_ZIP <- merge(mort_comp_by_ZIP, zipcode)
-# map_by_ZIP
-# mort_comp_by_ZIP
-# subset(mort_comp_by_ZIP, 
-#        num_complaints >= 100)
-# 
-# map('state', fill = TRUE, col = palette())
-# map('state.carto', fill = TRUE, col = palette())
-# help(maps)
-# 
-# us_map <- get_map(location = "United States", zoom = 12)
-# ggmap(us_map)
+# %Complaints related to Stress & Total Complaints received by State 
+stress_by_state <- filter(mort_comp_by_state, Issue_type == "Stressed")
+
+# Convert state names to full names
+stress_by_state$State <- abbr2state(stress_by_state$State)
+
+# Remove blank / missing States
+stress_by_state <- subset(stress_by_state, (State != "NA"))
+
+# From Recmap library
+usa <- data.frame(x = state.center$x, 
+                  y = state.center$y, 
+                  # make the rectangles overlap by correcting lines of longitude distance
+                  dx = sqrt(state.area) / 2 / (0.8 * 60 * cos(state.center$y*pi/180)), 
+                  dy = sqrt(state.area) / 2 / (0.8 * 60) , 
+                  #z = sqrt(state.area), 
+                  z = 1, 
+                  name = state.name)
+
+plot.recmap(usa)
+
+op <- par(mfrow = c(1 ,1), mar = c(0, 0, 0, 0), bg = NA)
+plot.recmap(M <- usa[!usa$name %in% c("Hawaii", "Alaska"), ], 
+            col.text = 'black', lwd=2)
+
+# Merge with State-level Complaints data
+usa_cart <- merge(usa, stress_by_state, 
+             by.x = "name",
+             by.y = "State")
+usa_cart$z <- usa_cart$num_complaints
+usa_cart$z <- 1
+
+# Cartogram
+plot.recmap(M <- usa_cart[!usa_cart$name %in% c("Hawaii", "Alaska"), ], 
+            col.text = M$comp_perc, 
+            #col.text = 'grey', 
+            border = M$comp_perc, 
+            lwd=2)
 
 ```
