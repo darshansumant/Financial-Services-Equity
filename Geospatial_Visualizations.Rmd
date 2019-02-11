@@ -82,6 +82,8 @@ phl_dist$nudge_x[phl_dist$OBJECTID == 2] <- 0.5
 
 ```
 
+## Exploring Property Tax Delinquencies in Philadelphia
+
 ```{r Map}
 
 # Plot Districts on Top of Geocoded Maptile
@@ -92,7 +94,7 @@ ggmap(ph_map) +
           color="red") +
   geom_sf(data = phl_taxdel, 
           inherit.aes = FALSE, 
-          aes(color = num_years_, size = total_due)) + 
+          aes(color = num_years_, size = total_asse)) + 
   scale_fill_viridis_c(alpha = .4) + 
   geom_label(data = phl_dist, inherit.aes = FALSE, 
              aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
@@ -106,3 +108,5 @@ ggmap(ph_map) +
         panel.background = element_rect(fill = "aliceblue"))
 
 ```
+
+## Cartogram for Mortgage Delinquencies
