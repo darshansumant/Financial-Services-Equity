@@ -29,8 +29,12 @@ library("maps")
 library("mapdata")
 library("openintro")
 library("grid")
+library("tools")
+library("maptools")
+library("lwgeom")
 
 # library(c("cowplot", "googleway", "ggrepel", "ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
+library("rgeos")
 library("cowplot")
 library("googleway")
 library("ggrepel")
@@ -44,36 +48,43 @@ register_google(key = "AIzaSyCvTsf9fTcIeH9d7WkTVxvYQzu80Hs-EvQ")
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
-```{r test}
-# dc_loc <- geocode("Washington, D.C.")
-# dc_map <- qmap(c(lon=dc_loc$lon, lat=dc_loc$lat), source="google", zoom=12)
-# dc_map
-# 
-# ph_loc <- geocode("Philadelphia")
-# ph_map <- qmap(c(lon=ph_loc$lon, lat=ph_loc$lat), source="google", zoom=12)
-# ph_map
-# 
-# ny_loc <- geocode("New York")
-# ny_map <- qmap(c(lon=ny_loc$lon, lat=ny_loc$lat), source="google", zoom=12)
-# ny_map
-# 
-# lv_loc <- geocode("Clark County, N.V.")
-# lv_map <- qmap(c(lon=lv_loc$lon, lat=lv_loc$lat), source="google", zoom=12)
-# lv_map
-```
+```{r Philly_Shapefiles}
 
-```{r test2}
-taxdist <- read_sf("datasets/20181201_TaxDistricts/LOCALTAXDISTRICT.shp")
-plot(taxdist, max.plot=15)
-summary(taxdist)
-```
+# Use ggmap to get Philly maptile
+ph_map <- get_map(location = "Philadelphia County, Pennsylvania", zoom = 12)
 
-```{r test3}
-# phl_parcels <- read_sf("datasets/Philly_parcels/DOR_Parcel.shp")
-# summary(phl_parcels)
-# plot(phl_parcels)
+# Load Parcel-level Shapefile
+phl_parcels <- read_sf("datasets/Philly_parcels/DOR_Parcel.shp")
+summary(phl_parcels)
 
+# Load City Council Districts Shapefile
 phl_dist <- read_sf("datasets/Philly_Council_Districts_2016/Council_Districts_2016.shp")
 summary(phl_dist)
-plot(phl_dist)
+
+# Calculate District Centroids
+phl_dist <- cbind(phl_dist, st_coordinates(st_centroid(phl_dist)))
+
+# Nudge Centroid Labels on Y-axis
+phl_dist$nudge_y <- 0
+phl_dist$nudge_y[phl_dist$OBJECTID == 9] <- -1.0
+phl_dist$nudge_y[phl_dist$OBJECTID == 10] <- -0.5
+
+# Nudge Centroid Labels on X-axis
+phl_dist$nudge_x <- 0
+phl_dist$nudge_x[phl_dist$OBJECTID == 4] <- 0.5
+phl_dist$nudge_x[phl_dist$OBJECTID == 2] <- 0.5
+
+```
+```{r Map}
+
+# Plot Districts on Top of Geocoded Maptile
+ggmap(ph_map) +
+  geom_sf(data = phl_dist, inherit.aes = FALSE, 
+          fill=NA, color=gray(0.5)) +
+  coord_sf(datum = NA) + 
+  geom_label(data = phl_dist, inherit.aes = FALSE, 
+             aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
+             nudge_y = phl_dist$nudge_y,
+             nudge_x = phl_dist$nudge_x)
+
 ```
