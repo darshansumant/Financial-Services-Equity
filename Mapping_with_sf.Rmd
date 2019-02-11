@@ -61,9 +61,9 @@ ny_loc <- geocode("New York")
 ny_map <- qmap(c(lon=ny_loc$lon, lat=ny_loc$lat), source="google", zoom=12)
 ny_map
 
-# lv_loc <- geocode("Clark County, N.V.")
-# lv_map <- qmap(c(lon=lv_loc$lon, lat=lv_loc$lat), source="google", zoom=12)
-# lv_map
+lv_loc <- geocode("Clark County, N.V.")
+lv_map <- qmap(c(lon=lv_loc$lon, lat=lv_loc$lat), source="google", zoom=12)
+lv_map
 ```
 
 ```{r test2}
@@ -88,21 +88,21 @@ world_points <- cbind(world, st_coordinates(st_centroid(world$geometry)))
 sites <- data.frame(longitude = c(-80.144005, -80.109), latitude = c(26.479005, 26.83))
 sites <- st_as_sf(sites, coords = c("longitude", "latitude"), crs = 4326, agr = "constant")
 
-ggplot(data = world) + 
-  geom_sf(fill= "antiquewhite") + 
-  geom_sf(data = sites, size = 4, shape = 23, fill = "darkred") + 
+ggplot(data = world) +
+  geom_sf(fill= "antiquewhite") +
+  geom_sf(data = sites, size = 4, shape = 23, fill = "darkred") +
   geom_text(data= world_points,aes(x=X, y=Y, label=name),
-              color = "darkblue", fontface = "bold", check_overlap = FALSE) + 
-  annotate(geom = "text", x = -90, y = 26, label = "Gulf of Mexico", 
-           fontface = "italic", color = "grey22", size = 6) + 
-  annotation_scale(location = "bl", width_hint = 0.5) + 
-  annotation_north_arrow(location = "bl", which_north = "true", 
+              color = "darkblue", fontface = "bold", check_overlap = FALSE) +
+  annotate(geom = "text", x = -90, y = 26, label = "Gulf of Mexico",
+           fontface = "italic", color = "grey22", size = 6) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  annotation_north_arrow(location = "bl", which_north = "true",
                          pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
-                         style = north_arrow_fancy_orienteering) + 
-  coord_sf(xlim = c(-102.15, -74.12), ylim = c(7.65, 33.97), expand = FALSE) + 
+                         style = north_arrow_fancy_orienteering) +
+  coord_sf(xlim = c(-102.15, -74.12), ylim = c(7.65, 33.97), expand = FALSE) +
   xlab("Longitude") +
-  ylab("Latitude") + 
-  ggtitle("Map of the Gulf of Mexico and the Caribbean Sea") + 
+  ylab("Latitude") +
+  ggtitle("Map of the Gulf of Mexico and the Caribbean Sea") +
   theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5),
         panel.background = element_rect(fill = "aliceblue"))
 
@@ -124,15 +124,16 @@ counties$area <- as.numeric(st_area(counties))
 
 ggplot(data = world) +
     geom_sf() +
-    geom_sf(data = states, fill = NA, color= gray(1.0)) + 
+    geom_sf(data = states, fill = NA, color= gray(1.0)) +
     geom_sf(data = counties, fill = NA, color = gray(.5)) +
-    geom_label(data = states, aes(X, Y, label = ID), size = 5, fontface = "bold", 
+    geom_label(data = states, aes(X, Y, label = ID), size = 5, fontface = "bold",
                nudge_y = states$nudge_y) +
     coord_sf(xlim = c(-88, -78), ylim = c(24.5, 33), expand = FALSE)
 
 ```
 
 ```{r test5}
+
 phl_dist <- read_sf("datasets/Philly_Council_Districts_2016/Council_Districts_2016.shp")
 phl_dist <- cbind(phl_dist, st_coordinates(st_centroid(phl_dist)))
 summary(phl_dist)
@@ -140,6 +141,15 @@ summary(phl_dist)
 
 ggplot(data = phl_dist) + 
   geom_sf() + 
-  geom_label(data = phl_dist, aes(X, Y, label = ID), size = 5, fontface = "bold")
+  geom_label(data = phl_dist, aes(X, Y, label = OBJECTID), size = 5, fontface = "bold")
+
+ph_map <- get_map(location = "Philadelphia", zoom = 12)
+ggmap(ph_map) +
+  geom_sf(data = phl_dist, inherit.aes = FALSE, 
+          aes(color = SID79),
+          fill=NA, color=gray(0.5)) +
+  coord_sf(datum = NA) + 
+  geom_label(data = phl_dist, inherit.aes = FALSE, 
+             aes(X, Y, label = OBJECTID), size = 5, fontface = "bold")
 
 ```
