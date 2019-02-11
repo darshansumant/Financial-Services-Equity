@@ -62,8 +62,8 @@ phl_dist <- read_sf("datasets/Philly_Council_Districts_2016/Council_Districts_20
 # Filter out Serious Tax Delinquencies
 phl_taxdel <- subset(phl_taxdel, 
                      grepl("resid", building_1) & 
-                       (principal_ >= 5000) &
-                       (oldest_yea >= 2016) &
+                       (principal_ >= 3000) &
+                       (oldest_yea >= 2009) &
                        (is_actiona == "true")) 
 
 # Calculate Centroids
@@ -86,8 +86,13 @@ phl_dist$nudge_x[phl_dist$OBJECTID == 2] <- 0.5
 
 # Plot Districts on Top of Geocoded Maptile
 ggmap(ph_map) +
-  geom_sf(data = phl_dist, inherit.aes = FALSE, fill=NA, color="blue") +
-  geom_sf(data = phl_taxdel, inherit.aes = FALSE, aes(fill = num_years_)) + 
+  geom_sf(data = phl_dist, 
+          inherit.aes = FALSE, 
+          fill=NA, 
+          color="red") +
+  geom_sf(data = phl_taxdel, 
+          inherit.aes = FALSE, 
+          aes(color = num_years_, size = total_due)) + 
   scale_fill_viridis_c(alpha = .4) + 
   geom_label(data = phl_dist, inherit.aes = FALSE, 
              aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
@@ -95,8 +100,8 @@ ggmap(ph_map) +
              nudge_x = phl_dist$nudge_x) + 
   xlab("") + 
   ylab("") + 
-  ggtitle("District 7 has most Serious Property Tax Delinquencies", 
-          subtitle = "(Serious Tax Delinquencies by City Council District)") + 
+  ggtitle("Serious tax delinquencies in Center City tend to be more recent", 
+          subtitle = "(North & West suburbs have properties with taxes unpaid for 7+ years)") + 
   theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5),
         panel.background = element_rect(fill = "aliceblue"))
 
