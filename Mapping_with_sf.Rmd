@@ -124,10 +124,22 @@ counties$area <- as.numeric(st_area(counties))
 
 ggplot(data = world) +
     geom_sf() +
-    geom_sf(data = states, fill = NA) + 
+    geom_sf(data = states, fill = NA, color= gray(1.0)) + 
     geom_sf(data = counties, fill = NA, color = gray(.5)) +
     geom_label(data = states, aes(X, Y, label = ID), size = 5, fontface = "bold", 
                nudge_y = states$nudge_y) +
     coord_sf(xlim = c(-88, -78), ylim = c(24.5, 33), expand = FALSE)
+
+```
+
+```{r test5}
+phl_dist <- read_sf("datasets/Philly_Council_Districts_2016/Council_Districts_2016.shp")
+phl_dist <- cbind(phl_dist, st_coordinates(st_centroid(phl_dist)))
+summary(phl_dist)
+
+
+ggplot(data = phl_dist) + 
+  geom_sf() + 
+  geom_label(data = phl_dist, aes(X, Y, label = ID), size = 5, fontface = "bold")
 
 ```
