@@ -81,9 +81,12 @@ ggplot(data = world) +
 ```{r test3}
 world_points<- st_centroid(world)
 world_points <- cbind(world, st_coordinates(st_centroid(world$geometry)))
+sites <- data.frame(longitude = c(-80.144005, -80.109), latitude = c(26.479005, 26.83))
 
 ggplot(data = world) + 
   geom_sf(fill= "antiquewhite") + 
+  geom_point(data = sites, aes(x = longitude, y = latitude), size = 4, 
+             shape = 23, fill = "darkred") + 
   geom_text(data= world_points,aes(x=X, y=Y, label=name),
               color = "darkblue", fontface = "bold", check_overlap = FALSE) + 
   annotate(geom = "text", x = -90, y = 26, label = "Gulf of Mexico", 
