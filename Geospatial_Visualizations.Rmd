@@ -209,23 +209,20 @@ usa <- data.frame(x = state.center$x,
                   z = 1, 
                   name = state.name)
 
-plot.recmap(usa)
-
+# Theme options
 op <- par(mfrow = c(1 ,1), mar = c(0, 0, 0, 0), bg = NA)
-plot.recmap(M <- usa[!usa$name %in% c("Hawaii", "Alaska"), ], 
-            col.text = 'black', lwd=2)
 
 # Merge with State-level Complaints data
 usa_cart <- merge(usa, stress_by_state, 
              by.x = "name",
              by.y = "State")
+
+# Re-define the variable for area of the cartogram boxes
 usa_cart$z <- usa_cart$num_complaints
-usa_cart$z <- 1
 
 # Cartogram
 plot.recmap(M <- usa_cart[!usa_cart$name %in% c("Hawaii", "Alaska"), ], 
-            col.text = M$comp_perc, 
-            #col.text = 'grey', 
+            col.text = 'black', 
             border = M$comp_perc, 
             lwd=2)
 
