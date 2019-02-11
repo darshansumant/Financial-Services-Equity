@@ -126,7 +126,8 @@ ggmap(ph_map) +
         axis.text.y = element_blank(),
         panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5),
         panel.background = element_rect(fill = "aliceblue"),
-        panel.border = element_rect(fill = NA, color = gray(0.5), linetype = "solid"))
+        panel.border = element_rect(fill = NA, color = gray(0.5), linetype = "solid"),
+        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt"))
 
 ```
 
