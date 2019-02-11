@@ -31,6 +31,7 @@ library("openintro")
 library("grid")
 library("tools")
 library("maptools")
+library("lwgeom")
 
 # library(c("cowplot", "googleway", "ggrepel", "ggspatial", "libwgeom", "sf", "rnaturalearth", "rnaturalearthdata"))
 library("rgeos")
@@ -117,9 +118,14 @@ states$nudge_y <- -1
 states$nudge_y[states$ID == "Florida"] <- 0.5
 states$nudge_y[states$ID == "South Carolina"] <- -1.5
 
+counties <- st_as_sf(map("county", plot = FALSE, fill = TRUE))
+counties$area <- as.numeric(st_area(counties))
+
+
 ggplot(data = world) +
     geom_sf() +
     geom_sf(data = states, fill = NA) + 
+    geom_sf(data = counties, fill = NA, color = gray(.5)) +
     geom_label(data = states, aes(X, Y, label = ID), size = 5, fontface = "bold", 
                nudge_y = states$nudge_y) +
     coord_sf(xlim = c(-88, -78), ylim = c(24.5, 33), expand = FALSE)
