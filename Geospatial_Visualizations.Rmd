@@ -95,7 +95,7 @@ ggmap(ph_map) +
   geom_sf(data = phl_taxdel, 
           inherit.aes = FALSE, 
           aes(color = num_years_, size = total_asse)) + 
-  scale_fill_viridis_c(alpha = .4) + 
+  scale_fill_viridis_c(alpha = .4, trans = "identity") + 
   geom_label(data = phl_dist, inherit.aes = FALSE, 
              aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
              nudge_y = phl_dist$nudge_y,
@@ -105,7 +105,8 @@ ggmap(ph_map) +
   ggtitle("Serious tax delinquencies in Center City tend to be more recent", 
           subtitle = "(North & West suburbs have properties with taxes unpaid for 7+ years)") + 
   theme(panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5),
-        panel.background = element_rect(fill = "aliceblue"))
+        panel.background = element_rect(fill = "aliceblue"),
+        panel.border = element_rect(fill = NA))
 
 ```
 
