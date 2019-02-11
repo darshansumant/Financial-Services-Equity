@@ -312,8 +312,8 @@ ph_map &lt;- get_map(location = &quot;Philadelphia County, Pennsylvania&quot;, z
 <pre><code>## Source : https://maps.googleapis.com/maps/api/staticmap?center=Philadelphia%20County,%20Pennsylvania&amp;zoom=12&amp;size=640x640&amp;scale=2&amp;maptype=terrain&amp;language=en-EN&amp;key=xxx-EvQ</code></pre>
 <pre><code>## Source : https://maps.googleapis.com/maps/api/geocode/json?address=Philadelphia+County,+Pennsylvania&amp;key=xxx-EvQ</code></pre>
 <pre class="r"><code># Load Parcel-level Shapefile
-phl_parcels &lt;- read_sf(&quot;datasets/Philly_parcels/DOR_Parcel.shp&quot;)
-summary(phl_parcels)</code></pre>
+phl_prcl &lt;- read_sf(&quot;datasets/Philly_parcels/DOR_Parcel.shp&quot;)
+summary(phl_prcl)</code></pre>
 <pre><code>##     OBJECTID         RECSUB            BASEREG             MAPREG         
 ##  Min.   :     1   Length:601698      Length:601698      Length:601698     
 ##  1st Qu.:150425   Class :character   Class :character   Class :character  
@@ -396,8 +396,9 @@ summary(phl_dist)</code></pre>
 ##  Mean   : 5.50   Mean   :0                                        
 ##  3rd Qu.: 7.75   3rd Qu.:0                                        
 ##  Max.   :10.00   Max.   :0</code></pre>
-<pre class="r"><code># Calculate District Centroids
+<pre class="r"><code># Calculate Centroids
 phl_dist &lt;- cbind(phl_dist, st_coordinates(st_centroid(phl_dist)))
+phl_prcl &lt;- cbind(phl_prcl, st_coordinates(st_centroid(phl_prcl)))
 
 # Nudge Centroid Labels on Y-axis
 phl_dist$nudge_y &lt;- 0

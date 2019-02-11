@@ -54,15 +54,16 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ph_map <- get_map(location = "Philadelphia County, Pennsylvania", zoom = 12)
 
 # Load Parcel-level Shapefile
-phl_parcels <- read_sf("datasets/Philly_parcels/DOR_Parcel.shp")
-summary(phl_parcels)
+phl_prcl <- read_sf("datasets/Philly_parcels/DOR_Parcel.shp")
+summary(phl_prcl)
 
 # Load City Council Districts Shapefile
 phl_dist <- read_sf("datasets/Philly_Council_Districts_2016/Council_Districts_2016.shp")
 summary(phl_dist)
 
-# Calculate District Centroids
+# Calculate Centroids
 phl_dist <- cbind(phl_dist, st_coordinates(st_centroid(phl_dist)))
+phl_prcl <- cbind(phl_prcl, st_coordinates(st_centroid(phl_prcl)))
 
 # Nudge Centroid Labels on Y-axis
 phl_dist$nudge_y <- 0
