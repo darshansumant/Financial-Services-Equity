@@ -143,13 +143,23 @@ ggplot(data = phl_dist) +
   geom_sf() + 
   geom_label(data = phl_dist, aes(X, Y, label = OBJECTID), size = 5, fontface = "bold")
 
-ph_map <- get_map(location = "Philadelphia", zoom = 12)
+ph_map <- get_map(location = "Philadelphia County, Pennsylvania", zoom = 12)
+
+phl_dist$nudge_y <- 0
+phl_dist$nudge_y[phl_dist$OBJECTID == 9] <- -1.0
+phl_dist$nudge_y[phl_dist$OBJECTID == 10] <- -0.5
+
+phl_dist$nudge_x <- 0
+phl_dist$nudge_x[phl_dist$OBJECTID == 4] <- 0.5
+phl_dist$nudge_x[phl_dist$OBJECTID == 2] <- 0.5
+
 ggmap(ph_map) +
   geom_sf(data = phl_dist, inherit.aes = FALSE, 
-          aes(color = SID79),
           fill=NA, color=gray(0.5)) +
   coord_sf(datum = NA) + 
   geom_label(data = phl_dist, inherit.aes = FALSE, 
-             aes(X, Y, label = OBJECTID), size = 5, fontface = "bold")
+             aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
+             nudge_y = phl_dist$nudge_y,
+             nudge_x = phl_dist$nudge_x)
 
 ```
