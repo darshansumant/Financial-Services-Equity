@@ -53,17 +53,22 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 # Use ggmap to get Philly maptile
 ph_map <- get_map(location = "Philadelphia County, Pennsylvania", zoom = 12)
 
-# Load Parcel-level Shapefile
-phl_prcl <- read_sf("datasets/Philly_parcels/DOR_Parcel.shp")
-summary(phl_prcl)
+# Load Parcel-level Delinquency Shapefile
+phl_taxdel <- read_sf("datasets/Philly_Council_Districts_2016/real_estate_tax_delinquencies.shp")
 
 # Load City Council Districts Shapefile
 phl_dist <- read_sf("datasets/Philly_Council_Districts_2016/Council_Districts_2016.shp")
-summary(phl_dist)
+
+# Filter out Serious Tax Delinquencies
+phl_taxdel <- subset(phl_taxdel, 
+                     grepl("resid", building_1) & 
+                       (principal_ >= 1000) &
+                       (oldest_yea >= 2016) &
+                       (is_actiona == "true")) 
 
 # Calculate Centroids
 phl_dist <- cbind(phl_dist, st_coordinates(st_centroid(phl_dist)))
-phl_prcl <- cbind(phl_prcl, st_coordinates(st_centroid(phl_prcl)))
+phl_taxdel <- cbind(phl_taxdel, st_coordinates(st_centroid(phl_taxdel)))
 
 # Nudge Centroid Labels on Y-axis
 phl_dist$nudge_y <- 0
@@ -76,13 +81,15 @@ phl_dist$nudge_x[phl_dist$OBJECTID == 4] <- 0.5
 phl_dist$nudge_x[phl_dist$OBJECTID == 2] <- 0.5
 
 ```
+
 ```{r Map}
 
 # Plot Districts on Top of Geocoded Maptile
 ggmap(ph_map) +
   geom_sf(data = phl_dist, inherit.aes = FALSE, 
-          fill=NA, color=gray(0.5)) +
-  coord_sf(datum = NA) + 
+          fill=NA, color="blue") +
+  geom_sf(data = phl_taxdel, inherit.aes = FALSE, 
+          fill="red", color=gray(0.5)) + 
   geom_label(data = phl_dist, inherit.aes = FALSE, 
              aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
              nudge_y = phl_dist$nudge_y,
