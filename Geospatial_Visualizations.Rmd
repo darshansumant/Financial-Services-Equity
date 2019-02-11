@@ -116,17 +116,21 @@ ggmap(ph_map) +
   coord_sf(xlim = c(-75.30, -74.95), ylim = c(39.85, 40.15), expand = TRUE) +
   xlab("") + 
   ylab("") + 
-  ggtitle("Serious tax delinquencies in Center City tend to be more recent", 
-          subtitle = "(North & West suburbs have properties with taxes unpaid for 7+ years)") + 
-  theme(axis.text.x = element_blank(),
+  ggtitle("Serious Tax delinquencies in Center City\nDistricts tend to be more recent", 
+          subtitle = "Northern & Western suburban districts have properties with\ntaxes unpaid for 7+ years") + 
+  theme(plot.title = element_text(size = 18, lineheight=.8, hjust = 0, face="bold"), 
+        plot.subtitle = element_text(size = 14, lineheight=.8, face="italic"), 
+        legend.title = element_text(size=10, face="italic"),
+        legend.text = element_text(size=10),
+        axis.text.x = element_blank(),
         axis.text.y = element_blank(),
         panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5),
         panel.background = element_rect(fill = "aliceblue"),
-        panel.border = element_rect(fill = NA))
+        panel.border = element_rect(fill = NA, color = gray(0.5), linetype = "solid"))
 
 ```
 
-## Consumer Complaints on Mortgage Delinquencies in New York City
+
 
 ```{r Catrogram}
 # 
