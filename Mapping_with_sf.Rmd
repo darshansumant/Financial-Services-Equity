@@ -120,7 +120,6 @@ states$nudge_y[states$ID == "South Carolina"] <- -1.5
 ggplot(data = world) +
     geom_sf() +
     geom_sf(data = states, fill = NA) + 
-    geom_text(data = states, aes(X, Y, label = ID), size = 5) +
     geom_label(data = states, aes(X, Y, label = ID), size = 5, fontface = "bold", 
                nudge_y = states$nudge_y) +
     coord_sf(xlim = c(-88, -78), ylim = c(24.5, 33), expand = FALSE)
