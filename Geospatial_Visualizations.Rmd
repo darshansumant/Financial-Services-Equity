@@ -226,4 +226,5 @@ plot.recmap(M <- usa_cart[!usa_cart$name %in% c("Hawaii", "Alaska"), ],
             border = M$comp_perc, 
             lwd=2)
 
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```

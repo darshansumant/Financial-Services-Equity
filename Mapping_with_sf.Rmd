@@ -43,9 +43,41 @@ library("sf")
 library("rnaturalearth")
 library("rnaturalearthdata")
 
+library("cartogram")
+library("recmap")
+
 register_google(key = "AIzaSyCvTsf9fTcIeH9d7WkTVxvYQzu80Hs-EvQ")
 
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+```{r test_cartogram}
+usa <- data.frame(x = state.center$x, 
+                  y = state.center$y, 
+                  # make the rectangles overlap by correcting lines of longitude distance
+                  dx = sqrt(state.area) / 2 / (0.8 * 60 * cos(state.center$y*pi/180)), 
+                  dy = sqrt(state.area) / 2 / (0.8 * 60) , 
+                  z = sqrt(state.area), 
+                  name = state.name)
+
+plot.recmap(usa)
+
+op <- par(mfrow = c(1 ,1), mar = c(0, 0, 0, 0), bg = NA)
+plot.recmap(M <- usa[!usa$name %in% c("Hawaii", "Alaska"), ], 
+            col.text = 'black', lwd=2)
+
+Cartogram <- recmap(Map <- usa[!usa$name %in% c("Hawaii", "Alaska"), ])
+head(Cartogram)
+
+smp <- c(29, 22, 30, 3, 17, 8, 9, 41, 18, 15, 38, 35, 21, 23, 19, 6, 31, 32, 20, 
+         28, 48, 4, 13, 14, 42, 37, 5, 16, 36 , 43, 25, 33, 12, 7, 39, 44, 2, 47,
+         45, 46, 24, 10, 1,11 ,40 ,26 ,27 ,34)
+
+plot(Cartogram.Area <- recmap(M[smp, ]), 
+     col.text = 'black', lwd = 2)
+
+head(M)
+plot.recmap(M)
 ```
 
 ```{r test}
