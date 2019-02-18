@@ -120,12 +120,17 @@ knitr::opts_chunk$set(echo=TRUE,
 ```
 
 ```{r Define Theme}
+
+# Ditch Axes (for Maps)
 ditch_the_axes <- theme(
   axis.text = element_blank(),
   axis.line = element_blank(),
   axis.ticks = element_blank(),
-  axis.title = element_blank(),
-  panel.background = element_rect(fill="NA", color="NA"),
+  axis.title = element_blank()
+  )
+
+# Standard Theme
+standard_theme <- theme(panel.background = element_rect(fill="NA", color="NA"),
   panel.border = element_rect(fill="NA",color="NA",size=5),
   panel.grid = element_blank(),
   plot.margin = margin(.5,.5,.5,.5, "cm"),
@@ -330,6 +335,7 @@ p1 +
            size=5,
            color="red",
            label="Metro & Non-Metro area trends have diverged since 2013") + 
+  standard_theme + 
   theme(panel.grid.major = element_line(colour = "gray"),
         axis.text = element_text(colour = "black"),
         axis.ticks = element_line(size = 2),
@@ -369,6 +375,7 @@ p2 + labs(colour = "Region Type",
   scale_x_discrete("Month",
                    labels=month.abb
                    ) + 
+  standard_theme + 
   theme(axis.ticks = element_line(size = 2),
         legend.position = c(0.2, 0.9),
         legend.background = element_rect(fill = "gray"),
@@ -398,6 +405,7 @@ p3a <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)),
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
   scale_color_manual(values=c('#440154ff','#21918dff')) + 
+  standard_theme + 
   theme(legend.position = c(0.6, 0.9),
         legend.background = element_rect(fill = "gray"),
         legend.direction = "horizontal"
@@ -422,6 +430,7 @@ p3b <- ggplot(filter(npa_by_metro, grepl("Metro", RegionType)),
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
   scale_color_manual(values=c('#440154ff','#21918dff')) + 
+  standard_theme + 
   theme(legend.position = c(0.6, 0.9),
         legend.background = element_rect(fill = "gray"),
         legend.direction = "horizontal"
@@ -484,13 +493,9 @@ p4 + labs(colour = "Mean Delinquency Rate",
                            title.position = "top",
                            label.position = "right",
                            keywidth = )) + 
-  theme(legend.position = "bottom", legend.box = "horizontal") +
-  theme(plot.title = element_text(size = rel(1.2)),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.line = element_blank(),
-        axis.ticks = element_blank(),
-        axis.text = element_blank())
-
+  ditch_the_axes + 
+  standard_theme + 
+  theme(legend.position = "bottom", legend.box = "horizontal")
 ```
 
 ## Inter-State differences in NPA rates
