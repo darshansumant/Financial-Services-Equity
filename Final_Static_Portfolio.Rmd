@@ -130,10 +130,12 @@ ditch_the_axes <- theme(
   plot.margin = margin(.5,.5,.5,.5, "cm"),
   plot.title = element_text(family="Times", 
                             face="bold",
-                            size=20),
+                            size=20,
+                            hjust=0.1),
   plot.subtitle = element_text(family="Times", 
                                face="italic",
-                               size=14),
+                               size=14,
+                               hjust=0.1),
   legend.background = element_rect(color="black"),
   legend.justification = "center",
   legend.text = element_text(size=rel(0.5))
@@ -298,7 +300,7 @@ ii. mean delinquency rates in the non-metro areas mirrored those in the metro ar
 
 
 ```{r Plot 1}
-
+del_by_metro
 # Plot delinquency trends by Region Type
 p1 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)), 
              aes(x=Month, 
@@ -319,12 +321,24 @@ p1 + labs(colour = "Region Type",
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  theme(plot.title = element_text(size = rel(1.2)),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
-        panel.grid.major = element_line(colour = "black"),
-        axis.text = element_text(colour = "blue"),
+  annotate("rect",
+           xmin=as.Date("2013-04-01", "%Y-%m-%d"),
+           xmax=as.Date("2018-10-01", "%Y-%m-%d"),
+           ymin=3.25,
+           ymax=3.45,
+           alpha=0.2,
+           label="Metro & Non-Metro area trends have diverged since 2013") + 
+  annotate("text",
+           x=as.Date("2016-01-01", "%Y-%m-%d"),
+           y=3.35,
+           size=5,
+           color="red",
+           label="Metro & Non-Metro area trends have diverged since 2013") + 
+  theme(panel.grid.major = element_line(colour = "grey50"),
+        axis.text = element_text(colour = "black"),
         axis.ticks = element_line(size = 2),
-        legend.position = "bottom")
+        legend.position = c(0.8, 0.9),
+        legend.background = element_rect(fill = "gray"))
 
 ```
 
