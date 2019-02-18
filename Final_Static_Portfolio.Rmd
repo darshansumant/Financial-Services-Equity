@@ -788,6 +788,12 @@ p9 + labs(colour = "Mean Delinquency Rate",
   ditch_the_axes + 
   standard_theme + 
   theme(legend.position = "bottom", legend.box = "horizontal")
+
+knitr::opts_chunk$set(echo=TRUE, 
+                      message=FALSE, 
+                      warning=FALSE, 
+                      fig.width=12, 
+                      fig.height=8)
 ```
 
 ### Examining potential Credit Tightening across New York, New Jersey, & Pennsylvania
@@ -830,6 +836,7 @@ process_rates_county <- applied_county %>%
 ```
 
 ```{r Plot Approval Rate by County}
+
 # Map Data at State & County-level
 states <- map_data("state")
 counties <- map_data("county")
