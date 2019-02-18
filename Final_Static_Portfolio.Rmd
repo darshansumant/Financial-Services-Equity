@@ -144,7 +144,7 @@ standard_theme <- theme(panel.background = element_rect(fill="NA", color="NA"),
                                hjust=0.1),
   legend.background = element_rect(color="black"),
   legend.justification = "center",
-  legend.text = element_text(size=rel(0.5))
+  legend.text = element_text(size=rel(0.8))
   )
 
 my_color_scale <- scale_color_gradient2(low="red",
@@ -406,7 +406,7 @@ p3a <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)),
                date_labels = "%Y") + 
   scale_color_manual(values=c('#440154ff','#21918dff')) + 
   standard_theme + 
-  theme(legend.position = c(0.6, 0.9),
+  theme(legend.position = c(0.8, 0.9),
         legend.background = element_rect(fill = "gray"),
         legend.direction = "horizontal"
         ) + 
@@ -431,7 +431,7 @@ p3b <- ggplot(filter(npa_by_metro, grepl("Metro", RegionType)),
                date_labels = "%Y") + 
   scale_color_manual(values=c('#440154ff','#21918dff')) + 
   standard_theme + 
-  theme(legend.position = c(0.6, 0.9),
+  theme(legend.position = c(0.8, 0.9),
         legend.background = element_rect(fill = "gray"),
         legend.direction = "horizontal"
         ) + 
@@ -491,8 +491,8 @@ p4 + labs(colour = "Mean Delinquency Rate",
   scale_fill_viridis_c(labels = percent) + 
   guides(fill=guide_legend(title="Mean Delinquency Rate", 
                            title.position = "top",
-                           label.position = "right",
-                           keywidth = )) + 
+                           label.position = "right"
+                           )) + 
   ditch_the_axes + 
   standard_theme + 
   theme(legend.position = "bottom", legend.box = "horizontal")
@@ -512,34 +512,40 @@ npa_state_long$Name <- tolower(npa_state_long$Name)
 
 # Month-on-month Delinquency Rates by State
 npa_by_state <- npa_state_long %>% 
-  group_by(Name) %>%
+  mutate(Year = year(Month)) %>%
+  group_by(Name, Year) %>%
   summarise(mean_npa = mean(default_rate),
             max_npa = max(default_rate),
             min_npa = min(default_rate),
             npa_diff = max_npa - min_npa)
 
 # Merge with Map Data
-npa_state_map <- merge(states, npa_by_state, sort = FALSE, 
+npa_state_map <- merge(states, 
+                       npa_by_state %>% filter(Year >= 2015), 
+                       sort = FALSE, 
                        by.x = "region", 
                        by.y = "Name")
 
 p5<- ggplot(npa_state_map, aes(long, lat)) + 
-  geom_polygon(aes(fill = mean_npa, group=group), color="white") + 
-  coord_fixed(1.3)
+  geom_polygon(aes(fill = mean_npa/100, group=group), color="white") + 
+  coord_fixed(1.3) + 
+  facet_wrap(~Year)
 
 p5 + labs(colour = "Mean NPA Rate", 
           x = "",
           y = "", 
-          title = "Not all Southern states have the worst NPA rates, unlike delinquency",
-          subtitle = "Collections focus seems to vary widely across states",
+          title = "Southern states show a rapid decline in NPA rates, as do NY, NJ, & PA",
+          subtitle = "Collections focus & Credit tightening may have increased in the Southern states",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "E") + 
-  scale_fill_gradientn(colours = terrain.colors(10)) + 
-  theme(plot.title = element_text(size = rel(1.2)),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.ticks = element_line(size = 2),
-        axis.text = element_blank())
-
+  scale_fill_viridis_c(labels = percent) + 
+  guides(fill=guide_legend(title="Mean NPA Rate", 
+                           title.position = "top",
+                           label.position = "right"
+                           )) + 
+  ditch_the_axes + 
+  standard_theme + 
+  theme(legend.position = "bottom", legend.box = "horizontal")
 ```
 
 ```{r Plot 6}
@@ -656,15 +662,22 @@ p7 + labs(colour = "Complaint Type",
           x = "Month",
           y = "No. of Consumer Complaints", 
           title = "Most complaints are associated with consumers facing financial stress",
-          subtitle = "Every month, over 500 consumers report being late on mortgage payments",
+          subtitle = "Every month, over 500 consumers self report being late on mortgage payments",
           caption = "(based on Consumer Complaints received by the CFPB)",
           tag = "F") + 
+  scale_y_continuous(expand=c(0,0)) + 
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  theme(plot.title = element_text(size = rel(1.2)),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.ticks = element_line(size = 2))
+  scale_fill_viridis_d() + 
+  guides(fill=guide_legend(title="Complaint Category", 
+                           title.position = "top",
+                           label.position = "right"
+                           )) + 
+  standard_theme + 
+  theme(axis.ticks = element_line(size = 2),
+        legend.position = c(0.8, 0.9)
+        )
 
 ```
 
