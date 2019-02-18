@@ -322,7 +322,7 @@ p1 +
        y = "Mean Delinquency Rate [% overdue by 30-89 days]",
        title = "Delinquency rates have declined after an initial spike following the 2008 crisis",
        subtitle = "seasonality patterns in delinquency are clearly visible",
-       caption = "(based on HMDA Mortgage Performance data by CFPB)",
+       caption = "source: HMDA Mortgage Performance data Jan '08 to Jun '18 published by CFPB (Jan '19)",
        tag = "A") + 
   scale_y_continuous(labels = scales::percent) + 
   scale_x_date(date_breaks = "1 year", 
@@ -375,7 +375,7 @@ p2 + labs(colour = "Region Type",
           y = "Disparity in delinquency rate (worst State - best State)", 
           title = "Delinquency disparity across states is largely due to Metro Areas",
           subtitle = "there is a subtle seasonal pattern even in delinquency disparity",
-          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          caption = "source: HMDA Mortgage Performance data Jan '08 to Jun '18 published by CFPB (Jan '19)",
           tag = "B") + 
   scale_y_continuous(labels = scales::percent) + 
   scale_x_discrete("Month",
@@ -492,7 +492,7 @@ p4 + labs(colour = "Mean Delinquency Rate",
           y = "", 
           title = "Mortgage delinquency is consistently higher in the Southern states",
           subtitle = "Mississippi has the highest mortgage delinquency for last 4 years",
-          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          caption = "source: HMDA Mortgage Performance data Jan '08 to Jun '18 published by CFPB (Jan '19)",
           tag = "D") + 
   scale_fill_viridis_c(labels = percent) + 
   guides(fill=guide_legend(title="Mean Delinquency Rate", 
@@ -542,7 +542,7 @@ p5 + labs(colour = "Mean NPA Rate",
           y = "", 
           title = "Southern states show a rapid decline in NPA rates, as do NY, NJ, & PA",
           subtitle = "Collections focus & Credit tightening may have increased in the Southern states",
-          caption = "(based on HMDA Mortgage Performance data by CFPB)",
+          caption = "source: HMDA Mortgage Performance data Jan '08 to Jun '18 published by CFPB (Jan '19)",
           tag = "E") + 
   scale_fill_viridis_c(labels = percent) + 
   guides(fill=guide_legend(title="Mean NPA Rate", 
@@ -671,7 +671,7 @@ p7 + labs(colour = "Complaint Type",
           y = "No. of Consumer Complaints", 
           title = "Most complaints are associated with consumers facing financial stress",
           subtitle = "Volume of Stress related complaints has gradually decreased, in line with total volume of complaints",
-          caption = "(based on Consumer Complaints received by the CFPB)",
+          caption = "source: Consumer Complaints Database published by CFPB (updated daily)",
           tag = "F") + 
   scale_y_continuous(expand=c(0,0)) + 
   scale_x_date(date_breaks = "1 year", 
@@ -739,7 +739,7 @@ p8 + labs(colour = "%Complaints related to\n Financial Stress",
           y = "", 
           title = "Falling behind on mortgage payments is the #1 concern across major states",
           subtitle = "Over 40% of consumer complaints received from NY, CA, NJ, MA over last 4 years pertain to financial stress\nFlorida has seen a consistent decline in proportion of stress related complaints",
-          caption = "(based on Consumer Complaints received by the CFPB)",
+          caption = "source: Consumer Complaints Database published by CFPB (updated daily)",
           tag = "G") + 
   scale_fill_viridis_d(drop=FALSE) + 
   guides(fill=guide_legend(title="%Complaints related to\n Financial Stress", 
