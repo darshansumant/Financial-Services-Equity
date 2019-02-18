@@ -620,23 +620,25 @@ mort_comp <- mort_comp %>% mutate(
 
 ```
 
-```{r Group by}
+```{r Aggregate Complaints by Category, State, Year}
 
 # Count of complaints received by Issue Type & Month
 mort_comp_by_issue <- mort_comp %>% 
   group_by(Issue_type, Month_received) %>%
   summarise(num_complaints = n())
 
-# Count of complaints received by Issue Type & State
-mort_comp_by_state <- filter(mort_comp, Year_received == 2017) %>% 
-  group_by(Issue_type, State) %>%
+# Count of complaints received by Issue Type & State every Year
+mort_comp_by_state <- mort_comp %>% 
+  group_by(Issue_type, State, Year_received) %>%
   summarise(num_complaints = n())
 
 # Calculate %complaints by State that are Stress related
 mort_comp_by_state <- mort_comp_by_state %>%
-  group_by(State) %>%
-  mutate(comp_perc = num_complaints / sum(num_complaints))
-
+  group_by(State, Year_received) %>%
+  #mutate(comp_perc = num_complaints / sum(num_complaints))
+  mutate(comp_perc = ifelse(num_complaints >= 30,
+                            num_complaints / sum(num_complaints),
+                            -0.1))
 ```
 
 ### Trends in Mortgage related complaints
@@ -708,27 +710,38 @@ mort_comp_by_state$Statename <- tolower(abbr2state(mort_comp_by_state$State))
 
 # Merge with Map Data
 comp_state_map <- merge(states, 
-                        filter(mort_comp_by_state, Issue_type == "Stressed"), 
+                        mort_comp_by_state %>% filter(Issue_type == "Stressed" &
+                                                        Year_received >= 2015 &
+                                                        Year_received <= 2018),
                         sort = FALSE, 
                         by.x = "region", 
                         by.y = "Statename")
 
+# Create discrete bins based on %complaints related to Financial Stress
+comp_state_map$perc_stress <- cut(comp_state_map$comp_perc,
+                                  breaks=c(0, 0.1, 0.2, 0.3, 0.4, 1.0),
+                                  labels=c("0-10","10-20","20-30","30-40","40+"))
+
 # Plot proportion of Stress related complaints by State
 p8 <- ggplot(comp_state_map, aes(long, lat)) + 
-  geom_polygon(aes(fill = comp_perc, group=group), color="white") + 
-  coord_fixed(1.3)
+  geom_polygon(aes(fill = perc_stress, group=group), color="black") + 
+  coord_fixed(1.3) + 
+  facet_wrap(~Year_received)
 
-p8 + labs(colour = "Mean NPA Rate", 
+p8 + labs(colour = "%Complaints related to\n Financial Stress", 
           x = "",
           y = "", 
-          title = "Falling behind on mortgage payments is the #1 concern across major cities",
-          subtitle = "Over 40% of consumer complaints received from NY, CA, IL, MA, NJ indicate financial stress",
+          title = "Falling behind on mortgage payments is the #1 concern across major states",
+          subtitle = "Over 40% of consumer complaints received from NY, CA, NJ, MA over last 4 years pertain to financial stress\nFlorida has seen a consistent decline in proportion of stress related complaints",
           caption = "(based on Consumer Complaints received by the CFPB)",
           tag = "G") + 
-  scale_fill_gradientn(colours = terrain.colors(10)) + 
-  theme(plot.title = element_text(size = rel(1.2)),
-        panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.ticks = element_line(size = 2),
-        axis.text = element_blank())
+  scale_fill_viridis_d(drop=FALSE) + 
+  guides(fill=guide_legend(title="%Complaints related to\n Financial Stress", 
+                           title.position = "top",
+                           label.position = "right"
+                           )) + 
+  ditch_the_axes + 
+  standard_theme + 
+  theme(legend.position = "bottom", legend.box = "horizontal")
 
 ```
