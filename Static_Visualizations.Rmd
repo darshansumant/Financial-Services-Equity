@@ -58,10 +58,36 @@ knitr::opts_chunk$set(echo=TRUE,
                       fig.height=8)
 ```
 
+```{r Define Theme}
+ditch_the_axes <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  axis.title = element_blank(),
+  panel.background = element_rect(color="NA"),
+  panel.border = element_rect(fill="NA",color="NA",size=5),
+  panel.grid = element_blank(),
+  plot.margin = margin(.5,.5,.5,.5, "cm"),
+  legend.background = element_rect(color="black"),
+  legend.justification = "center",
+  legend.text = element_text(size=rel(0.5))
+  )
+
+my_color_scale <- scale_color_gradient2(low="red",
+                                        mid="white",
+                                        high="green")
+my_fill_scale <- scale_fill_gradient2(low="red",
+                                      mid="white",
+                                      high="green",
+                                      breaks = c(0, .2, .4, .6, .8, 1))
+```
+
 ```{r Read Data}
 # HMDA Loan Approvals data for NY, NJ, PA, CA, IL, TX, FL
 hmda_states = read_csv("datasets/hmda/hmda_lar_large_states_14_17.csv")
 ```
+
+# COunty-level Approval & Booking Rates by Year
 
 ```{r Calculate Approval & Booking Rates by County}
 approved <- c("Loan originated","Application approved but not accepted")
@@ -96,31 +122,7 @@ process_rates_county <- applied_county %>%
          )
 ```
 
-```{r Define Theme}
-ditch_the_axes <- theme(
-  axis.text = element_blank(),
-  axis.line = element_blank(),
-  axis.ticks = element_blank(),
-  axis.title = element_blank(),
-  panel.background = element_rect(color="NA"),
-  panel.border = element_rect(fill="NA",color="NA",size=5),
-  panel.grid = element_blank(),
-  plot.margin = margin(.5,.5,.5,.5, "cm"),
-  legend.background = element_rect(color="black"),
-  legend.justification = "center",
-  legend.text = element_text(size=rel(0.5))
-  )
-
-my_color_scale <- scale_color_gradient2(low="red",
-                                        mid="white",
-                                        high="green")
-my_fill_scale <- scale_fill_gradient2(low="red",
-                                      mid="white",
-                                      high="green",
-                                      breaks = c(0, .2, .4, .6, .8, 1))
-```
-
-```{r Plot on Map}
+```{r Approval Rate by County}
 # Map Data at State & County-level
 states <- map_data("state")
 counties <- map_data("county")
@@ -143,9 +145,11 @@ ne_base <- ggplot(data = ne_df, mapping = aes(x = long, y = lat, group = group))
   geom_polygon(color = "black", fill = "gray")
 
 # Join county map data with Process Rates
-ne_rates <- inner_join(ne_county, process_rates_county, by = c("region","subregion"))
+ne_rates <- inner_join(ne_county, 
+                       process_rates_county %>% filter(applied >= 100), 
+                       by = c("region","subregion"))
 
-# Plot County-level approval rates
+# Plot County-level Approval rates
 ne_base + 
   geom_polygon(data = ne_rates, 
                aes(fill = approval_rate),
@@ -157,7 +161,42 @@ ne_base +
   ditch_the_axes + 
   guides(fill=guide_legend(title="Approval Rate", 
                            title.position = "top",
+                           label.position = "bottom"
+                           )) + 
+  scale_fill_viridis_c(labels = percent)
+```
+
+```{r Booking Rate by County}
+# Plot County-level Booking rates
+ne_base + 
+  geom_polygon(data = ne_rates, 
+               aes(fill = booking_rate),
+               color = "white") +
+  facet_wrap(~as_of_year) + 
+  geom_polygon(color = "black", fill = NA) +
+  theme_bw() + 
+  theme(legend.position = "bottom", legend.box = "horizontal") +
+  ditch_the_axes + 
+  guides(fill=guide_legend(title="Booking Rate", 
+                           title.position = "top",
                            label.position = "bottom",
                            keywidth = )) + 
   scale_fill_viridis_c(labels = percent)
+```
+
+```{r Delinquency, NPA, & Flow Rates by County}
+
+## Delinquency (30-89 days overdue) Rates by month at County, State, State-Area type level 
+del_county = read_csv("datasets/mortgage-performance/CountyMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
+
+## Non-Performing Asset (90+ days overdue) Rates by month at County, State, State-Area type level
+npa_county = read_csv("datasets/mortgage-performance/CountyMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
+
+del_county
+
+# Load National Financial Well-Being Survey data
+well_being = read_csv("datasets/surveys/NFWBS_PUF_2016_data.csv")
+
+ggplot(well_being, aes(FWBscore)) + 
+  geom_histogram()
 ```
