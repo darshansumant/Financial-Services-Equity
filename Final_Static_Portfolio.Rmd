@@ -492,12 +492,12 @@ p4 + labs(colour = "Mean Delinquency Rate",
           x = "",
           y = "", 
           title = "Mortgage delinquency is consistently higher in the Southern states",
-          subtitle = "Mississippi has the highest mortgage delinquency for last 4 years",
+          subtitle = "Mississippi has the highest mortgage delinquency for last 4 years (2014-17)",
           caption = "source: HMDA Mortgage Performance data Jan '08 to Jun '18 published by CFPB (Jan '19)",
           tag = "D") + 
   scale_fill_viridis_c(labels = percent) + 
   guides(fill=guide_legend(title="Mean Delinquency Rate", 
-                           title.position = "top",
+                           title.position = "left",
                            label.position = "right"
                            )) + 
   ditch_the_axes + 
@@ -548,7 +548,7 @@ p5 + labs(colour = "Mean NPA Rate",
           tag = "E") + 
   scale_fill_viridis_c(labels = percent) + 
   guides(fill=guide_legend(title="Mean NPA Rate", 
-                           title.position = "top",
+                           title.position = "left",
                            label.position = "right"
                            )) + 
   ditch_the_axes + 
@@ -645,7 +645,7 @@ p7 + labs(colour = "Complaint Type",
   scale_fill_manual(values=viridis::viridis(4),
                     labels=c("Other","Accessibility","Servicing","Stressed")) + 
   guides(fill=guide_legend(title="Complaint Category", 
-                           title.position = "top",
+                           title.position = "left",
                            label.position = "right"
                            )) + 
   annotate("rect",
@@ -708,7 +708,7 @@ p8 + labs(colour = "%Complaints related to\n Financial Stress",
           tag = "G") + 
   scale_fill_viridis_d(drop=FALSE) + 
   guides(fill=guide_legend(title="%Complaints related to\n Financial Stress", 
-                           title.position = "top",
+                           title.position = "left",
                            label.position = "right"
                            )) + 
   ditch_the_axes + 
@@ -776,13 +776,13 @@ p9 <- ne_base +
 p9 + labs(colour = "Mean Delinquency Rate", 
           x = "",
           y = "", 
-          title = "Mortgage delinquency is consistently higher in the Southern states",
-          subtitle = "Mississippi has the highest mortgage delinquency for last 4 years",
+          title = "Philadelphia County stands out with highest mortgage delinquency rates across the 3 states",
+          subtitle = "For the other counties in the region, the Mean Delinquency rates are fairly over the last 4 years (2014-17)",
           caption = "source: HMDA Mortgage Performance data Jan '08 to Jun '18 published by CFPB (Jan '19)",
           tag = "H") + 
   scale_fill_viridis_c(labels = percent) + 
   guides(fill=guide_legend(title="Mean Delinquency Rate", 
-                           title.position = "top",
+                           title.position = "left",
                            label.position = "right"
                            )) + 
   ditch_the_axes + 
