@@ -236,8 +236,6 @@ npa_metro_long <- gather(select(npa_metro, -c(Name, CBSACode)),
   mutate(Month = as.Date(paste(Month,"-01",sep="")),
          Mth = format(Month, "%b"))
 
-# # Check datasets loaded
-# ls()
 ```
 
 ```{r Group By AreaType & Month, message=FALSE}
@@ -263,12 +261,8 @@ npa_by_metro <- npa_metro_long %>%
 
 ```{r Merge Delinquency & NPA rates, message=FALSE}
 
-# # Check common field names
-# colnames(del_by_metro)[colnames(del_by_metro) %in% colnames(npa_by_metro)]
-
 # Merge Delinquency rates and Default (NPA) rates by RegionType & Month
 tot_by_metro <- merge(del_by_metro, npa_by_metro, by=c("RegionType", "Month"))
-#tot_by_metro
 
 # Regress mean delinquency & default rates by Month & Region Type
 tot_by_metro$pred.mean_del <- predict(lm(mean_del ~ format(Month, "%m") + RegionType, 
@@ -300,24 +294,24 @@ ii. mean delinquency rates in the non-metro areas mirrored those in the metro ar
 
 
 ```{r Plot 1}
-del_by_metro
 # Plot delinquency trends by Region Type
 p1 <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)), 
              aes(x=Month, 
-                 y=mean_del 
-                 ,color=RegionType
-                 ,group=RegionType
+                 y=mean_del,
+                 color=RegionType,
+                 group=RegionType
                  )) + 
   geom_point() + 
-  geom_line()
+  geom_line(size=2)
 
-p1 + labs(colour = "Region Type",
-          x = "Year",
-          y = "Mean Delinquency Rate [% overdue by 30-89 days]", 
-          title = "Delinquency rates have declined after an initial spike following the 2008 crisis",
-          subtitle = "seasonality patterns in delinquency are clearly visible",
-          caption = "(based on HMDA Mortgage Performance data by CFPB)",
-          tag = "A") + 
+p1 + 
+  labs(colour = "Region Type",
+       x = "Year",
+       y = "Mean Delinquency Rate [% overdue by 30-89 days]",
+       title = "Delinquency rates have declined after an initial spike following the 2008 crisis",
+       subtitle = "seasonality patterns in delinquency are clearly visible",
+       caption = "(based on HMDA Mortgage Performance data by CFPB)",
+       tag = "A") + 
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
@@ -334,11 +328,12 @@ p1 + labs(colour = "Region Type",
            size=5,
            color="red",
            label="Metro & Non-Metro area trends have diverged since 2013") + 
-  theme(panel.grid.major = element_line(colour = "grey50"),
+  theme(panel.grid.major = element_line(colour = "gray"),
         axis.text = element_text(colour = "black"),
         axis.ticks = element_line(size = 2),
         legend.position = c(0.8, 0.9),
-        legend.background = element_rect(fill = "gray"))
+        legend.background = element_rect(fill = "gray")) + 
+  scale_color_manual(values=c('#440154ff','#21918dff'))
 
 ```
 
