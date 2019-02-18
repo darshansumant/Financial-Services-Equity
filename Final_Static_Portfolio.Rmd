@@ -403,7 +403,8 @@ p3a <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)),
         legend.direction = "horizontal"
         ) + 
   labs(y = "Mean Delinquency Rate across States",
-       title = "Delinquency trends for Metro & Non-Metro areas have been diverging since 2013"
+       title = "Delinquency trends for Metro & Non-Metro areas have been diverging since 2013",
+       tag = "C"
        )
 
 # Mean NPA Trends
@@ -449,7 +450,8 @@ del_state_long$Name <- tolower(del_state_long$Name)
 
 # Month-on-month Delinquency Rates by State
 del_by_state <- del_state_long %>% 
-  group_by(Name) %>%
+  mutate(Year = year(Month)) %>%
+  group_by(Name, Year) %>%
   summarise(mean_del = mean(delinquency_rate),
             max_del = max(delinquency_rate),
             min_del = min(delinquency_rate),
@@ -459,25 +461,34 @@ del_by_state <- del_state_long %>%
 states <- map_data("state")
 
 # Merge with Map Data
-del_state_map <- merge(states, del_by_state, sort = FALSE, 
+del_state_map <- merge(states, 
+                       del_by_state %>% filter(Year >= 2015), 
+                       sort = FALSE, 
                        by.x = "region", 
                        by.y = "Name")
 
 p4<- ggplot(del_state_map, aes(long, lat)) + 
-  geom_polygon(aes(fill = mean_del, group=group), color="white") + 
-  coord_fixed(1.3)
+  geom_polygon(aes(fill = mean_del/100, group=group), color="white") + 
+  coord_fixed(1.3) + 
+  facet_wrap(~Year)
 
 p4 + labs(colour = "Mean Delinquency Rate", 
           x = "",
           y = "", 
-          title = "Mortgage delinquency is higher in the Southern states",
-          subtitle = "Mississippi has the highest mortgage delinquency",
+          title = "Mortgage delinquency is consistently higher in the Southern states",
+          subtitle = "Mississippi has the highest mortgage delinquency for last 4 years",
           caption = "(based on HMDA Mortgage Performance data by CFPB)",
           tag = "D") + 
-  scale_fill_gradientn(colours = terrain.colors(10)) + 
+  scale_fill_viridis_c(labels = percent) + 
+  guides(fill=guide_legend(title="Mean Delinquency Rate", 
+                           title.position = "top",
+                           label.position = "right",
+                           keywidth = )) + 
+  theme(legend.position = "bottom", legend.box = "horizontal") +
   theme(plot.title = element_text(size = rel(1.2)),
         panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.ticks = element_line(size = 2),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
         axis.text = element_blank())
 
 ```
