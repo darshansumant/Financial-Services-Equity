@@ -1,0 +1,163 @@
+---
+title: "Static Visualizations"
+author: "Darshan Sumant"
+date: "February 17, 2019"
+output:
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+# Load required packages
+library("rmarkdown")
+library("readr")
+library("haven")
+library("plyr")
+library("dplyr")
+library("tidyr")
+library("stringr")
+library("ggplot2")
+library("zoo")
+library("lubridate")
+library("directlabels")
+library("wesanderson")
+library("ggmap")
+library("maps")
+library("mapdata")
+library("openintro")
+library("grid")
+library("tools")
+library("maptools")
+library("lwgeom")
+
+library("rgeos")
+library("cowplot")
+library("googleway")
+library("ggrepel")
+library("ggspatial")
+library("sf")
+library("rnaturalearth")
+library("rnaturalearthdata")
+library("zipcode")
+
+library("cartogram")
+library("recmap")
+library("scales")
+
+register_google(key = "AIzaSyCvTsf9fTcIeH9d7WkTVxvYQzu80Hs-EvQ")
+
+knitr::opts_chunk$set(echo=TRUE, 
+                      message=FALSE, 
+                      warning=FALSE, 
+                      fig.width=12, 
+                      fig.height=8)
+```
+
+```{r Read Data}
+# HMDA Loan Approvals data for NY, NJ, PA, CA, IL, TX, FL
+hmda_states = read_csv("datasets/hmda/hmda_lar_large_states_14_17.csv")
+```
+
+```{r Calculate Approval & Booking Rates by County}
+approved <- c("Loan originated","Application approved but not accepted")
+booked <- c("Loan originated")
+
+# Number of applications by Stata & Census Tract & Year
+applied_county <- hmda_states %>% 
+  group_by(state_name, county_name, as_of_year) %>% 
+  summarise(applied = n())
+
+# Number of Approved applications by Stata & Census Tract & Year
+approved_county <- hmda_states %>% 
+  filter(action_taken_name %in% approved) %>%
+  group_by(state_name, county_name, as_of_year) %>% 
+  summarise(approved = n())
+
+# Number of Loands Originates / Final Booked by Stata & Census Tract & Year
+booked_county <- hmda_states %>% 
+  filter(action_taken_name %in% booked) %>%
+  group_by(state_name, county_name, as_of_year) %>% 
+  summarise(booked = n())
+
+# Merge all together
+process_rates_county <- applied_county %>% 
+  left_join(approved_county, by = c("state_name", "county_name", "as_of_year")) %>% 
+  left_join(booked_county, by = c("state_name", "county_name", "as_of_year")) %>% 
+  mutate(approval_rate = approved/applied, 
+         booking_rate = booked/approved, 
+         reject_rate = 1 - approval_rate,
+         abnb_rate = 1 - booking_rate,
+         loan_success_rate = booked/applied
+         )
+```
+
+```{r Define Theme}
+ditch_the_axes <- theme(
+  axis.text = element_blank(),
+  axis.line = element_blank(),
+  axis.ticks = element_blank(),
+  axis.title = element_blank(),
+  panel.background = element_rect(color="NA"),
+  panel.border = element_rect(fill="NA",color="NA",size=5),
+  panel.grid = element_blank(),
+  plot.margin = margin(.5,.5,.5,.5, "cm"),
+  legend.background = element_rect(color="black"),
+  legend.justification = "center",
+  legend.text = element_text(size=rel(0.5))
+  )
+
+my_color_scale <- scale_color_gradient2(low="red",
+                                        mid="white",
+                                        high="green")
+my_fill_scale <- scale_fill_gradient2(low="red",
+                                      mid="white",
+                                      high="green",
+                                      breaks = c(0, .2, .4, .6, .8, 1))
+```
+
+```{r Plot on Map}
+# Map Data at State & County-level
+states <- map_data("state")
+counties <- map_data("county")
+
+# Rectify State & County Names
+process_rates_county <- process_rates_county %>%
+  mutate(region = tolower(state_name),
+         subregion = tolower(gsub("([A-Za-z]+).*",
+                                  "\\1",
+                                  county_name))
+  )
+
+# Define Stata & County Level geographies
+ne_df <- subset(states, region %in% c("new york", "new jersey", "pennsylvania"))
+ne_county <- subset(counties, region %in% c("new york", "new jersey", "pennsylvania"))
+
+# Define the base map
+ne_base <- ggplot(data = ne_df, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.3) + 
+  geom_polygon(color = "black", fill = "gray")
+
+# Join county map data with Process Rates
+ne_rates <- inner_join(ne_county, process_rates_county, by = c("region","subregion"))
+
+# Plot County-level approval rates
+ne_base + 
+  geom_polygon(data = ne_rates, 
+               aes(fill = approval_rate),
+               color = "white") +
+  facet_wrap(~as_of_year) + 
+  geom_polygon(color = "black", fill = NA) +
+  theme_bw() + 
+  theme(legend.position = "bottom", legend.box = "horizontal") +
+  ditch_the_axes + 
+  guides(fill=guide_legend(title="Approval Rate", 
+                           title.position = "top",
+                           label.position = "bottom",
+                           keywidth = )) + 
+  scale_fill_viridis_c(labels = percent)
+```

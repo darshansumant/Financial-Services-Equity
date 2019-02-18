@@ -99,20 +99,20 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 # Load Mortgage Performance data
 
 ## Delinquency (30-89 days overdue) Rates by month at County, State, State-Area type level 
-del_county = read_csv("datasets/Mortgage_Performance/CountyMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
-del_state = read_csv("datasets/Mortgage_Performance/StateMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
-del_metro = read_csv("datasets/Mortgage_Performance/MetroAreaMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
+del_county = read_csv("datasets/mortgage-performance/CountyMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
+del_state = read_csv("datasets/mortgage-performance/StateMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
+del_metro = read_csv("datasets/mortgage-performance/MetroAreaMortgagesPercent-30-89DaysLate-thru-2018-06.csv")
 
 ## Non-Performing Asset (90+ days overdue) Rates by month at County, State, State-Area type level
-npa_county = read_csv("datasets/Mortgage_Performance/CountyMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
-npa_state = read_csv("datasets/Mortgage_Performance/StateMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
-npa_metro = read_csv("datasets/Mortgage_Performance/MetroAreaMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
+npa_county = read_csv("datasets/mortgage-performance/CountyMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
+npa_state = read_csv("datasets/mortgage-performance/StateMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
+npa_metro = read_csv("datasets/mortgage-performance/MetroAreaMortgagesPercent-90-plusDaysLate-thru-2018-06.csv")
 
 # Load National Financial Well-Being Survey data
-nfwbs_puf = read_csv("datasets/Surveys/NFWBS_PUF_2016_data.csv")
+nfwbs_puf = read_csv("datasets/surveys/NFWBS_PUF_2016_data.csv")
 
 # Load Consumer Complaints Data
-complaints = read_csv("datasets/Surveys/Consumer_Complaints.csv")
+complaints = read_csv("datasets/surveys/Consumer_Complaints.csv")
 
 # Rectify column names
 colnames(complaints) = gsub(" ", "_",colnames(complaints))
