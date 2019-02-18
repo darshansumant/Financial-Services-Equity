@@ -477,7 +477,8 @@ states <- map_data("state")
 
 # Merge with Map Data
 del_state_map <- merge(states, 
-                       del_by_state %>% filter(Year >= 2015), 
+                       del_by_state %>% filter(Year >= 2014 &
+                                                 Year <= 2017), 
                        sort = FALSE, 
                        by.x = "region", 
                        by.y = "Name")
@@ -527,7 +528,8 @@ npa_by_state <- npa_state_long %>%
 
 # Merge with Map Data
 npa_state_map <- merge(states, 
-                       npa_by_state %>% filter(Year >= 2015), 
+                       npa_by_state %>% filter(Year >= 2014 &
+                                                 Year <= 2017), 
                        sort = FALSE, 
                        by.x = "region", 
                        by.y = "Name")
@@ -552,43 +554,6 @@ p5 + labs(colour = "Mean NPA Rate",
   ditch_the_axes + 
   standard_theme + 
   theme(legend.position = "bottom", legend.box = "horizontal")
-```
-
-```{r Plot 6}
-
-counties <- map_data("county")
-
-# Convert county names to lowercase
-del_county_long$Name <- substr(tolower(del_county_long$Name), 
-                               1, 
-                               nchar(del_county_long$Name)-7)
-
-# Month-on-month Delinquency Rates by County Area
-del_by_county <- del_county_long %>%
-  group_by(Name, Month) %>%
-  summarise(mean_del = mean(delinquency_rate),
-            max_del = max(delinquency_rate),
-            min_del = min(delinquency_rate),
-            del_diff = max_del - min_del)
-
-# Merge with Map Data
-del_county_map <- merge(counties, del_by_county, all.x = TRUE, sort = FALSE, 
-                        by.x = "subregion", 
-                        by.y = "Name")
-
-p6<- ggplot(del_county_map, aes(long, lat)) + 
-  geom_polygon(aes(fill = mean_del, group=group), color="white") + 
-  coord_fixed(1.3)
-
-# p6 + labs(colour = "Mean Delinquency Rate", 
-#           x = "Longitude",
-#           y = "Latitude", 
-#           title = "Substantial differences in delinquency rates across states",
-#           subtitle = "states vary widely from each other, though no regional trends seen",
-#           caption = "(based on HMDA Mortgage Performance data by CFPB)",
-#           tag = "F") + 
-#   scale_fill_gradientn(colours = terrain.colors(10))
-
 ```
 
 ## Insights from Consumer Complaints
@@ -717,8 +682,8 @@ mort_comp_by_state$Statename <- tolower(abbr2state(mort_comp_by_state$State))
 # Merge with Map Data
 comp_state_map <- merge(states, 
                         mort_comp_by_state %>% filter(Issue_type == "Stressed" &
-                                                        Year_received >= 2015 &
-                                                        Year_received <= 2018),
+                                                        Year_received >= 2014 &
+                                                        Year_received <= 2017),
                         sort = FALSE, 
                         by.x = "region", 
                         by.y = "Statename")
@@ -750,4 +715,77 @@ p8 + labs(colour = "%Complaints related to\n Financial Stress",
   standard_theme + 
   theme(legend.position = "bottom", legend.box = "horizontal")
 
+```
+
+## Diving deeper into New York, New Jersey, & Pennsylvania
+
+```{r Replicate Analysis by County}
+
+# County map data
+counties <- map_data("county")
+
+# Delinquency Rates by County, convert state & county names to lowercase
+del_county_long <- gather(select(del_county, -c(RegionType, FIPSCode)),
+                          key = Month,
+                          value = delinquency_rate,
+                          convert = TRUE,
+                          -c(State, Name)) %>% 
+  mutate(Month = as.Date(paste(Month,"-01",sep="")),
+         Mth = format(Month, "%b"),
+         region = tolower(abbr2state(State)),
+         subregion = tolower(gsub("([A-Za-z]+).*",
+                                  "\\1",
+                                  Name)))
+
+# Month-on-month Delinquency Rates by County Area
+del_by_county <- del_county_long %>%
+  mutate(Year = year(Month)) %>%
+  group_by(region, subregion, Year) %>%
+  summarise(mean_del = mean(delinquency_rate),
+            max_del = max(delinquency_rate),
+            min_del = min(delinquency_rate),
+            del_diff = max_del - min_del)
+
+# Merge with Map Data
+del_county_map <- inner_join(counties, 
+                             del_by_county %>% 
+                               filter(region %in% c("new york", 
+                                                    "new jersey", 
+                                                    "pennsylvania") & 
+                                        Year >= 2014 &
+                                        Year <= 2017), 
+                             by = c("region", "subregion"))
+
+# Define Stata & County Level geographies
+ne_df <- subset(states, region %in% c("new york", "new jersey", "pennsylvania"))
+ne_county <- subset(counties, region %in% c("new york", "new jersey", "pennsylvania"))
+
+# Define the base map
+ne_base <- ggplot(data = ne_df, mapping = aes(x = long, y = lat, group = group)) + 
+  coord_fixed(1.3) + 
+  geom_polygon(data = ne_county, color = "white", fill="gray", alpha=0.5) + 
+  geom_polygon(color = "black", fill = "NA")
+
+# Plot the Delinquency by County
+p9 <- ne_base + 
+  geom_polygon(data = del_county_map, 
+               aes(fill = mean_del/100, group=group), color="white") + 
+  coord_fixed(1.3) + 
+  facet_wrap(~Year)
+
+p9 + labs(colour = "Mean Delinquency Rate", 
+          x = "",
+          y = "", 
+          title = "Mortgage delinquency is consistently higher in the Southern states",
+          subtitle = "Mississippi has the highest mortgage delinquency for last 4 years",
+          caption = "source: HMDA Mortgage Performance data Jan '08 to Jun '18 published by CFPB (Jan '19)",
+          tag = "H") + 
+  scale_fill_viridis_c(labels = percent) + 
+  guides(fill=guide_legend(title="Mean Delinquency Rate", 
+                           title.position = "top",
+                           label.position = "right"
+                           )) + 
+  ditch_the_axes + 
+  standard_theme + 
+  theme(legend.position = "bottom", legend.box = "horizontal")
 ```
