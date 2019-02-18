@@ -108,6 +108,7 @@ library("zipcode")
 library("cartogram")
 library("recmap")
 library("scales")
+library("gridExtra")
 
 register_google(key = "AIzaSyCvTsf9fTcIeH9d7WkTVxvYQzu80Hs-EvQ")
 
@@ -381,36 +382,57 @@ p2 + labs(colour = "Region Type",
 When we compare delinquency and NPA rates, we see that delinquency rates differ across metro and non-metro areas, but NPA rates remain comparable. This may indicate a differential debt collections approach and focus between metro and non-metro areas.
 
 ```{r Plot 3, message=FALSE}
-# Compare trends in delinquency and default (NPA) 
-p3 <- ggplot(filter(tot_by_metro, grepl("Metro", RegionType)),
-             aes(x=Month),
-             group=RegionType) + 
-  geom_line(aes(y=mean_del, colour=mean_del)) + 
-  geom_col(aes(y=mean_npa/3, colour=mean_npa)) + 
-  geom_dl(aes(y=mean_del, label = "delinquency"), 
-          method = list(dl.trans(x = x + 1.8, y = y - 1.2), "first.points")) +
-  geom_dl(aes(y=mean_npa/3, label = "default"), 
-          method = list(dl.trans(x = x - .8, y = y - .2), "last.points")) +
-  geom_smooth(aes(y=mean_del, group=RegionType)) + 
-  geom_smooth(aes(y=mean_npa/3, group=RegionType))
 
-p3 + scale_y_continuous(expand = c(0,0),
-                        labels = scales::comma,
-                        sec.axis = sec_axis(~.*3, name = "Mean Default (NPA) rate [% overdue by 90+ days]")) + 
-  scale_color_gradientn(colours = terrain.colors(10)) + 
-  labs(colour = "Intensity of distress", 
-       x = "Year",
-       y = "Mean Delinquency rate [% overdue by 30-89 days]", 
-       title = "Metro and Non-Metro areas differ in Delinquency rates, but not default rates",
-       subtitle = "this indicates disparity in Collection efforts across Metro & Non-Metro areas",
-       caption = "(based on HMDA Mortgage Performance data by CFPB)",
-       tag = "C") +
+# Mean Delinquency Trends
+p3a <- ggplot(filter(del_by_metro, grepl("Metro", RegionType)), 
+              aes(x=Month, 
+                  y=mean_del/100,
+                  color=RegionType,
+                  group=RegionType
+                  )) + 
+  geom_line(linetype = 2) + 
+  geom_point(size=2) + 
+  geom_smooth(aes(y=mean_del/100, group=RegionType), size=2) + 
+  scale_y_continuous(labels = scales::percent) + 
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  theme(panel.background = element_rect(fill = "white", colour = "grey50"),
-        axis.ticks = element_line(size = 2))
+  scale_color_manual(values=c('#440154ff','#21918dff')) + 
+  theme(legend.position = c(0.6, 0.9),
+        legend.background = element_rect(fill = "gray"),
+        legend.direction = "horizontal"
+        ) + 
+  labs(y = "Mean Delinquency Rate across States",
+       title = "Delinquency trends for Metro & Non-Metro areas have been diverging since 2013"
+       )
 
+# Mean NPA Trends
+p3b <- ggplot(filter(npa_by_metro, grepl("Metro", RegionType)), 
+              aes(x=Month, 
+                  y=mean_npa/100,
+                  color=RegionType,
+                  group=RegionType
+                  )) + 
+  geom_line(linetype = 2) + 
+  geom_point(size=2) + 
+  geom_smooth(aes(y=mean_npa/100, group=RegionType), size=2) + 
+  scale_y_continuous(labels = scales::percent) + 
+  scale_x_date(date_breaks = "1 year", 
+               date_minor_breaks = "1 month",
+               date_labels = "%Y") + 
+  scale_color_manual(values=c('#440154ff','#21918dff')) + 
+  theme(legend.position = c(0.6, 0.9),
+        legend.background = element_rect(fill = "gray"),
+        legend.direction = "horizontal"
+        ) + 
+  labs(y = "Mean NPA Rate across States",
+       title = "However NPA Rate trends have now converged"
+       )
+
+# Plot both one below the other
+grid.arrange(p3a, p3b, nrow = 2,
+             bottom = "This indicates uneven Debt Collection focus & disparate Credit Tightening across Metro & Non-Metro areas"
+             )
 ```
 
 ## Examining Inter-State differences in Delinquency rates
