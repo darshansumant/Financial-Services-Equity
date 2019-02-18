@@ -510,7 +510,8 @@ p4 + labs(colour = "Mean Delinquency Rate",
 NPA rates aggregated at the State level present a different picture:
 
 * Among the Southern states, Florida has a much worse NPA rate (about 5%) as compared to Texas (about 2%)
-* This indicates very different Delinquency to NPA flow rates across States, which in turn indicate towards disparity in Collections focus & effort by state
+* California has low NPA rates, though New York, New Jersey have high NPA rates
+* This indicates very different Delinquency to NPA flow rates across States, which in turn indicate towards disparity across States in Debt Collections focus & Credit Tightening policies
 
 ```{r Plot 5}
 
@@ -672,7 +673,8 @@ p7 + labs(colour = "Complaint Type",
 Comparing complaints received across states we see that:
 
 * Highly populous states such as New York, California, Illinois, Massachusetts, New Jersey receive complaints related to self-reported financial stress more than 40% of the time
-* Even neighboring states vary widely, such as North Dakota (over 65%) compared to Montana (less than 20%)
+* Even neighboring states with similar delinquency & NPA trends vary widely in self reported stress, such as New York & New Jersey (consistently over 40%) compared to Pennsylvania
+* In the South, Texas generated moderate proportion of consumer self reporting of financial stress, and this proportion has further reduced in the last 4 years
 
 ```{r Self reporting proportion by State}
 
@@ -718,6 +720,11 @@ p8 + labs(colour = "%Complaints related to\n Financial Stress",
 ```
 
 ## Diving deeper into New York, New Jersey, & Pennsylvania
+
+Our analysis so far warrants a deeper dive into the 3 large Northeastern states of New York, New Jersey, and Pennsylvania. These states have similar population densities & comparable consumer profiles. The delinquency levels & trends across these 3 states have also been fairly similar. However, consumer complaints data shows a stark difference in self-reporting of Financial Stress.
+
+* Delinquency rates across counties is fairly comparable, and the trend seems flat
+* Philadelphia county does stand out across the last 4 years with the highest mean delinquency rate
 
 ```{r Replicate Analysis by County}
 
@@ -834,6 +841,11 @@ process_rates_county <- applied_county %>%
          loan_success_rate = booked/applied
          )
 ```
+
+Approval Rates (proportion of New Home Purchase mortgages approved by a Financial Services firm or a Bank) are usually a strong and early indicator of Credit Tightening strategy adopted by the lenders. A persistent drop in Approval Rates would mean consumers face higher Credit Accessibility issues.
+
+* We don't see any particular decline in Approval Rates within a County
+* Counties in the region differ in terms of mean Approval Rate, however most counties have a healthy approval rate between 70%-90%. Though approval rates might be shifting in terms of customer or property profiles, which need to be examined closely
 
 ```{r Plot Approval Rate by County}
 
