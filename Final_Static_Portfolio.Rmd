@@ -879,3 +879,85 @@ ne_base +
                            )) + 
   theme(legend.position = "bottom", legend.box = "horizontal")
 ```
+
+## Impact on Property Tax collections
+
+An increase in Financial Stress also leads to aggravated impact on the local economy. Consumers who fall behind on scheduled payments, are often forced to re-allocate their savings & downgrade their consumption. However, an often neglected secondary effect is the revenue loss to the local government, city or county. Reduced sales cause a dip in sales tax collections, while certain local governments may see a rise in Property Tax delinquencies as well. All such factors together cause additional stress to the City or County government's finances, and in turn on the investment into community development initiatives.
+
+One such example is the Philadelphia County in Pennsylvania. Thanks to the property-level property tax assessments and delinquencies published by the City Government on the OpenDataPhilly portal, we can analyze potential impact of Financial Stress on local government revenues.
+
+```{r Philly_Shapefiles}
+
+# Use ggmap to get Philly maptile
+ph_map <- get_map(location = "Philadelphia County, Pennsylvania")
+
+# Load Parcel-level Delinquency Shapefile
+phl_taxdel <- read_sf("datasets/Philly_Council_Districts_2016/real_estate_tax_delinquencies.shp")
+
+# Load City Council Districts Shapefile
+phl_dist <- read_sf("datasets/Philly_Council_Districts_2016/Council_Districts_2016.shp")
+
+# Filter out Serious Tax Delinquencies
+phl_taxdel <- subset(phl_taxdel, 
+                     grepl("resid", building_1) & 
+                       (principal_ >= 3000) &
+                       (oldest_yea >= 2009) &
+                       (is_actiona == "true")) 
+
+# Calculate Centroids
+phl_dist <- cbind(phl_dist, st_coordinates(st_centroid(phl_dist)))
+phl_taxdel <- cbind(phl_taxdel, st_coordinates(st_centroid(phl_taxdel)))
+
+# Nudge Centroid Labels on Y-axis
+phl_dist$nudge_y <- 0
+phl_dist$nudge_y[phl_dist$OBJECTID == 9] <- -1.0
+phl_dist$nudge_y[phl_dist$OBJECTID == 10] <- -1.0
+phl_dist$nudge_y[phl_dist$OBJECTID == 2] <- -1.0
+
+# Nudge Centroid Labels on X-axis
+phl_dist$nudge_x <- 0
+phl_dist$nudge_x[phl_dist$OBJECTID == 4] <- 3.0
+phl_dist$nudge_x[phl_dist$OBJECTID == 2] <- 2.5
+phl_dist$nudge_x[phl_dist$OBJECTID == 6] <- 1.5
+phl_dist$nudge_x[phl_dist$OBJECTID == 3] <- -1.5
+phl_dist$nudge_x[phl_dist$OBJECTID == 10] <- 1.5
+```
+
+```{r Plot property tax delinquencies}
+
+# Plot Districts on Top of Geocoded Maptile
+ggmap(ph_map) +
+  geom_sf(data = phl_dist,
+          inherit.aes = FALSE,
+          fill=NA,
+          color="red",
+          size = 2) +
+  geom_sf(data = phl_taxdel,
+          inherit.aes = FALSE,
+          aes(color = num_years_, size = total_asse)) +
+  scale_colour_viridis_c("No. of Years\nTax unpaid",
+                         alpha = .75,
+                         trans = "identity") +
+  scale_size_area("Property\nValue",
+                  trans = "identity",
+                  breaks = c(0, 250000, 500000, 750000, 1000000)) +
+  geom_label(data = phl_dist, inherit.aes = FALSE,
+             aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
+             nudge_y = phl_dist$nudge_y,
+             nudge_x = phl_dist$nudge_x) +
+  coord_sf(xlim = c(-75.30, -74.95), ylim = c(39.85, 40.15), expand = TRUE) +
+  xlab("") +
+  ylab("") +
+  ggtitle("Serious Tax delinquencies in Center City\nDistricts tend to be more recent",
+          subtitle = "Northern & Western suburban districts have properties with\ntaxes unpaid for 7+ years") +
+  theme(plot.title = element_text(size = 18, lineheight=.8, hjust = 0, face="bold"),
+        plot.subtitle = element_text(size = 14, lineheight=.8, face="italic"),
+        legend.title = element_text(size=10, face="italic"),
+        legend.text = element_text(size=10),
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5),
+        panel.background = element_rect(fill = "aliceblue"),
+        panel.border = element_rect(fill = NA, color = gray(0.5), linetype = "solid"),
+        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt"))
+```
