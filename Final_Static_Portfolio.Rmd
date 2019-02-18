@@ -109,6 +109,7 @@ library("cartogram")
 library("recmap")
 library("scales")
 library("gridExtra")
+library("viridis")
 
 register_google(key = "AIzaSyCvTsf9fTcIeH9d7WkTVxvYQzu80Hs-EvQ")
 
@@ -327,8 +328,7 @@ p1 +
            xmax=as.Date("2018-12-01", "%Y-%m-%d"),
            ymin=0.0325,
            ymax=0.0345,
-           alpha=0.2,
-           label="Metro & Non-Metro area trends have diverged since 2013") + 
+           alpha=0.2) + 
   annotate("text",
            x=as.Date("2016-02-01", "%Y-%m-%d"),
            y=0.0335,
@@ -669,7 +669,8 @@ p7 + labs(colour = "Complaint Type",
   scale_x_date(date_breaks = "1 year", 
                date_minor_breaks = "1 month",
                date_labels = "%Y") + 
-  scale_fill_viridis_d() + 
+  scale_fill_manual(values=viridis::viridis(4),
+                    labels=c("Other","Accessibility","Servicing","Stressed")) + 
   guides(fill=guide_legend(title="Complaint Category", 
                            title.position = "top",
                            label.position = "right"
@@ -679,8 +680,7 @@ p7 + labs(colour = "Complaint Type",
            xmax=as.Date("2016-05-01", "%Y-%m-%d"),
            ymin=2000,
            ymax=2250,
-           alpha=0.2,
-           label="2012 complaints were added to the CFPB database in 2013,\nthe spike seen in Q1'13 should therefore be ignored in context") + 
+           alpha=0.2) + 
   annotate("text",
            x=as.Date("2014-10-01", "%Y-%m-%d"),
            y=2125,
