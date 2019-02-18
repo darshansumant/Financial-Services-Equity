@@ -377,7 +377,7 @@ p2 + labs(colour = "Region Type",
                    ) + 
   standard_theme + 
   theme(axis.ticks = element_line(size = 2),
-        legend.position = c(0.2, 0.9),
+        legend.position = c(0.35, 0.9),
         legend.background = element_rect(fill = "gray"),
         legend.direction = "horizontal"
         ) + 
@@ -659,10 +659,10 @@ p7 <- ggplot(mort_comp_by_issue,
             position = "stack")
 
 p7 + labs(colour = "Complaint Type", 
-          x = "Month",
+          x = "Year",
           y = "No. of Consumer Complaints", 
           title = "Most complaints are associated with consumers facing financial stress",
-          subtitle = "Every month, over 500 consumers self report being late on mortgage payments",
+          subtitle = "Volume of Stress related complaints has gradually decreased, in line with total volume of complaints",
           caption = "(based on Consumer Complaints received by the CFPB)",
           tag = "F") + 
   scale_y_continuous(expand=c(0,0)) + 
@@ -674,6 +674,19 @@ p7 + labs(colour = "Complaint Type",
                            title.position = "top",
                            label.position = "right"
                            )) + 
+  annotate("rect",
+           xmin=as.Date("2013-03-01", "%Y-%m-%d"),
+           xmax=as.Date("2016-05-01", "%Y-%m-%d"),
+           ymin=2000,
+           ymax=2250,
+           alpha=0.2,
+           label="2012 complaints were added to the CFPB database in 2013,\nthe spike seen in Q1'13 should therefore be ignored in context") + 
+  annotate("text",
+           x=as.Date("2014-10-01", "%Y-%m-%d"),
+           y=2125,
+           size=4,
+           color="red",
+           label="2012 complaints were added to the CFPB database in 2013,\nthe spike seen in Q1'13 should therefore be ignored in context") + 
   standard_theme + 
   theme(axis.ticks = element_line(size = 2),
         legend.position = c(0.8, 0.9)
