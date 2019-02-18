@@ -707,7 +707,7 @@ p8 + labs(colour = "%Complaints related to\n Financial Stress",
           caption = "source: Consumer Complaints Database published by CFPB (updated daily)",
           tag = "G") + 
   scale_fill_viridis_d(drop=FALSE) + 
-  guides(fill=guide_legend(title="%Complaints related to\n Financial Stress", 
+  guides(fill=guide_legend(title="%Complaints related \nto Financial Stress", 
                            title.position = "left",
                            label.position = "right"
                            )) + 
@@ -937,34 +937,43 @@ ggmap(ph_map) +
   geom_sf(data = phl_dist,
           inherit.aes = FALSE,
           fill=NA,
-          color="red",
-          size = 2) +
+          color="black",
+          size = 1) +
   geom_sf(data = phl_taxdel,
           inherit.aes = FALSE,
-          aes(color = num_years_, size = total_asse)) +
-  scale_colour_viridis_c("No. of Years\nTax unpaid",
-                         alpha = .75,
-                         trans = "identity") +
-  scale_size_area("Property\nValue",
+          aes(fill=num_years_, 
+              color=num_years_,
+              size = total_asse)) + 
+  scale_color_viridis_c("No. of Years\nTax unpaid",
+                       alpha = 1,
+                       breaks = c(0, 2, 4, 6, 8, 20),
+                       labels=c("0", "<2", "2-4", "4-6", "6-8", "8+"),
+                       guide=FALSE) +
+  scale_fill_viridis_c("No. of Years\nTax unpaid",
+                       alpha = 1,
+                       breaks = c(0, 2, 4, 6, 8, 20),
+                       labels=c("0", "<2", "2-4", "4-6", "6-8", "8+")) +
+  scale_size_area("Property Value\n($ '000s)", 
                   trans = "identity",
-                  breaks = c(0, 250000, 500000, 750000, 1000000)) +
+                  breaks = c(0, 250000, 500000, 750000, 1000000),
+                  labels = c("<250", "250-500", "500-750", "750-1000", "1000+")) +
   geom_label(data = phl_dist, inherit.aes = FALSE,
              aes(X, Y, label = OBJECTID), size = 5, fontface = "bold",
+             alpha = 0.5,
              nudge_y = phl_dist$nudge_y,
              nudge_x = phl_dist$nudge_x) +
   coord_sf(xlim = c(-75.30, -74.95), ylim = c(39.85, 40.15), expand = TRUE) +
-  xlab("") +
-  ylab("") +
-  ggtitle("Serious Tax delinquencies in Center City\nDistricts tend to be more recent",
-          subtitle = "Northern & Western suburban districts have properties with\ntaxes unpaid for 7+ years") +
-  theme(plot.title = element_text(size = 18, lineheight=.8, hjust = 0, face="bold"),
-        plot.subtitle = element_text(size = 14, lineheight=.8, face="italic"),
-        legend.title = element_text(size=10, face="italic"),
-        legend.text = element_text(size=10),
-        axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        panel.grid.major = element_line(color = gray(.5), linetype = "dashed", size = 0.5),
-        panel.background = element_rect(fill = "aliceblue"),
-        panel.border = element_rect(fill = NA, color = gray(0.5), linetype = "solid"),
-        plot.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt"))
+  labs(x = "",
+       y = "", 
+       title = "Serious Tax delinquencies in Center City\nDistricts tend to be more recent",
+       subtitle = "Northern & Western suburban districts have properties with\ntaxes unpaid for 7+ years",
+       caption = "source: Property Tax Delinquencies data (OpenDataPhilly.org)",
+       tag = "J") + 
+  guides(fill=guide_legend(title="No. of Years\nTax unpaid",
+                           title.position = "left",
+                           label.position = "right",
+                           order = 0)) +
+  ditch_the_axes + 
+  standard_theme + 
+  theme(legend.position = "bottom", legend.box = "horizontal")
 ```
